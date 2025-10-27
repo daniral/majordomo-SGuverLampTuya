@@ -1,0 +1,72 @@
+<script type="text/javascript">
+	function sendNewColor%.object_id%(val) {
+        setGlobal('%.object_title%.color',val);
+	    //callMethod('%.object_title%.setBrightness','value='+guverLamp%.object_id%colorBrightness);
+    }
+    function setColorBrightness%.object_id%(val) {
+		guverLamp%.object_id%colorBrightness=val;
+        $('#guverLamp%.object_id%_colorBright').html("Яркость: "+guverLamp%.object_id%colorBrightness);
+        sendNewColorbrightness%.object_id%();
+    }
+	function sendNewColorbrightness%.object_id%() {
+        setGlobal('%.object_title%.colorBrightness',guverLamp%.object_id%colorBrightness);
+	    //callMethod('%.object_title%.setBrightness','value='+guverLamp%.object_id%colorBrightness);
+    }
+    function setbrightness%.object_id%(val) {
+		guverLamp%.object_id%brightness=val;
+        $('#guverLamp%.object_id%_bright').html("Яркость: "+guverLamp%.object_id%brightness);
+        sendNewbrightness%.object_id%();
+    }	
+    function sendNewbrightness%.object_id%() {
+        setGlobal("%.object_title%.brightness",guverLamp%.object_id%brightness);
+		//callMethod('%.object_title%.setBrightness','value='+guverLamp%.object_id%brightness);
+    }
+    function setCCT%.object_id%(val) {
+        guverLamp%.object_id%cct=val;
+        $('#guverLamp%.object_id%_cct').html("Температура: "+guverLamp%.object_id%cct);
+        sendNewCCT%.object_id%();
+    }
+    function sendNewCCT%.object_id%() {
+        setGlobal("%.object_title%.cct",guverLamp%.object_id%cct);
+		//callMethod('%.object_title%.setCct','value='+guverLamp%.object_id%cct);
+    }
+    function sendScene%.object_id%(val) {
+		alert(val);
+        setGlobal("%.object_title%.scene",val);
+		//callMethod('%.object_title%.setCct','value='+guverLamp%.object_id%cct);
+    }
+</script>
+
+<style>
+	.card { background:#f4f4f4; border-radius:12px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.15); margin: 15px 0 15px 50px;}
+	input[type=color], input[type=range], select { width:100%; box-sizing:border-box; margin-bottom:8px;}
+</style>
+	
+<div class="device-widget controller loadtype_%.loadType%">
+ <div onClick='$("#icon%.object_id%_light").addClass("pressed");setTimeout("$(\"#icon%.object_id%_light\").removeClass(\"pressed\");",300);callMethod("%.object_title%.switch");'>
+  <div class="device-icon %.status|"off;on"%" id="icon%.object_id%_light" style='%.icon|"background-image:url(%.icon%)"%'></div>
+  <div class="device-header">%.object_description%</div>
+ </div>
+</div>
+
+<div class="card">
+	<h5>🎨 Цветной свет</h5>
+	<input type="color"  value="%.color%" onchange="sendNewColor%.object_id%(this.value);">
+	<div class="device-details"><span id="guverLamp%.object_id%_colorBright">Яркость: %.colorBrightness%</span></div>
+	<input type="range" min="0" max="100" value="%.colorBrightness%" oninput="setColorBrightness%.object_id%(this.value);">
+
+	<h5>⚪ Белый свет</h5>
+	<div class="device-details"><span id="guverLamp%.object_id%_bright">Яркость: %.brightness%</span></div>
+	<input type="range" min="0" max="100" value="%.brightness%" oninput="setbrightness%.object_id%(this.value);">
+	<div class="device-details"> <span id="guverLamp%.object_id%_cct">Температура: %.cct%</span></div>
+	<input type="range" min="0" max="100" value="%.cct%" oninput="setCCT%.object_id%(this.value);">
+
+	<h5>🎨 Сцена</h5>
+	<select id="sceneSelect" oninput="sendScene%.object_id%(this.value);">
+	<option value="">%.scene%</option>
+	<option value="Romantic">Romantic</option>
+	<option value="0d0e0f101112131415161718">Вечеринка</option>
+	<option value="191a1b1c1d1e1f2021222324">Ночной</option>
+	</select>
+</div>
+
