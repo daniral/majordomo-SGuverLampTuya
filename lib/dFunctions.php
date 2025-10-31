@@ -3,9 +3,9 @@
 if (!function_exists('normalizeRange')) {
     function normalizeRange($val, $min = 0, $max = 100) {
         $val = strtolower(trim($val));
-		if (is_string($val) && preg_match('/^[0-9a-f]{12}$/i', $val)) {
+		if (preg_match('/^[0-9a-f]{12}$/i', $val)) {
             return $val;
-        }elseif (is_string($val) && preg_match('/^#?[0-9a-f]{6}$/i', $val)) {
+        }elseif (preg_match('/^#?[0-9a-f]{6}$/i', $val)) {
             return $val;
         }elseif (is_numeric($val)) {
 			return (int)max($min, min($max, $val));
@@ -16,9 +16,12 @@ if (!function_exists('normalizeRange')) {
 
 if (!function_exists('hsvToRgbHex')) {
 	function hsvToRgbHex($hsvHex) {	
-		if (!is_string($hsvHex) || strlen($hsvHex) < 12) {
-			return ['rgbHex' => '#000000', 'brightness' => 0];
-		}
+	
+		$hsvHex = strtolower(trim($hsvHex));
+        // Проверка 12-значного HEX
+        if (!preg_match('/^[0-9a-f]{12}$/', $hsvHex)) {
+            return ['rgbHex' => '#ffff00', 'brightness' => 50];;
+        }
 
 		$hueHex = substr($hsvHex, 0, 4);
 		$satHex = substr($hsvHex, 4, 4);
@@ -64,6 +67,12 @@ if (!function_exists('rgbToHSVhex')) {
 	function rgbToHSVhex($rgbHex, $brightness = 100) {
 		// Убираем возможный символ "#"
 		$rgbHex = ltrim($rgbHex, '#');
+		$rgbHex = strtolower(trim($rgbHex));
+
+		// Проверяем, что это ровно 6 символов 0–f
+		if (!preg_match('/^[0-9a-f]{6}$/', $rgbHex)) {
+			return null;
+		}
 		// Разбираем HEX на компоненты RGB (0–255)
 		$r = hexdec(substr($rgbHex, 0, 2)) / 255;
 		$g = hexdec(substr($rgbHex, 2, 2)) / 255;
@@ -95,10 +104,11 @@ if (!function_exists('rgbToHSVhex')) {
 		$sat = round($s * 1000);
 		//$val = round($v * 1000);
 		$val = $brightness * 10;
+		
 		// Формируем строку в формате Tuya (по 4 hex-цифры на каждый параметр)
-		$hsv = str_pad(dechex($hue), 4, '0', STR_PAD_LEFT) .
-				 str_pad(dechex($sat), 4, '0', STR_PAD_LEFT) .
-				 str_pad(dechex($val), 4, '0', STR_PAD_LEFT);
+		$hsv = 	str_pad(dechex($hue), 4, '0', STR_PAD_LEFT) .
+				str_pad(dechex($sat), 4, '0', STR_PAD_LEFT) .
+				str_pad(dechex($val), 4, '0', STR_PAD_LEFT);
 				 
 		return strtolower($hsv);
 	}
