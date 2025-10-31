@@ -1,40 +1,122 @@
 <script type="text/javascript">
-	function sendNewColor%.object_id%(val) {
-        setGlobal('%.object_title%.color',val);
-	    //callMethod('%.object_title%.setBrightness','value='+guverLamp%.object_id%colorBrightness);
+    // создаём объект для текущей лампы, если его нет
+    if (typeof window.guverLamp === 'undefined') window.guverLamp = {};
+    if (typeof window.guverLamp%.object_id% === 'undefined') {
+        window.guverLamp%.object_id% = {
+            brightness: %.brightness% || 50,
+			colorBrightness: %.colorBrightness% || 50,
+			cct: %.cct% || 10,
+			workScene: null,
+			scenes: {}
+        };
+    }
+
+    // ================= Цветной свет =================
+    function sendNewColor%.object_id%(val) {
+        setGlobal('%.object_title%.color', val);
     }
     function setColorBrightness%.object_id%(val) {
-		guverLamp%.object_id%colorBrightness=val;
-        $('#guverLamp%.object_id%_colorBright').html("Яркость: "+guverLamp%.object_id%colorBrightness);
+        guverLamp%.object_id%.colorBrightness = val;
+        $('#guverLamp%.object_id%_colorBright').html("Яркость: " + guverLamp%.object_id%.colorBrightness);
         sendNewColorbrightness%.object_id%();
     }
-	function sendNewColorbrightness%.object_id%() {
-        setGlobal('%.object_title%.colorBrightness',guverLamp%.object_id%colorBrightness);
-	    //callMethod('%.object_title%.setBrightness','value='+guverLamp%.object_id%colorBrightness);
+    function sendNewColorbrightness%.object_id%() {
+        setGlobal('%.object_title%.colorBrightness', guverLamp%.object_id%.colorBrightness);
     }
+
+    // ================= Белый свет =================
     function setbrightness%.object_id%(val) {
-		guverLamp%.object_id%brightness=val;
-        $('#guverLamp%.object_id%_bright').html("Яркость: "+guverLamp%.object_id%brightness);
+        guverLamp%.object_id%.brightness = val;
+        $('#guverLamp%.object_id%_bright').html("Яркость: " + guverLamp%.object_id%.brightness);
         sendNewbrightness%.object_id%();
-    }	
-    function sendNewbrightness%.object_id%() {
-        setGlobal("%.object_title%.brightness",guverLamp%.object_id%brightness);
-		//callMethod('%.object_title%.setBrightness','value='+guverLamp%.object_id%brightness);
     }
+    function sendNewbrightness%.object_id%() {
+        setGlobal('%.object_title%.brightness', guverLamp%.object_id%.brightness);
+    }
+
+    // ================= CCT =================
     function setCCT%.object_id%(val) {
-        guverLamp%.object_id%cct=val;
-        $('#guverLamp%.object_id%_cct').html("Температура: "+guverLamp%.object_id%cct);
+        guverLamp%.object_id%.cct = val;
+        $('#guverLamp%.object_id%_cct').html("Температура: " + guverLamp%.object_id%.cct);
         sendNewCCT%.object_id%();
     }
     function sendNewCCT%.object_id%() {
-        setGlobal("%.object_title%.cct",guverLamp%.object_id%cct);
-		//callMethod('%.object_title%.setCct','value='+guverLamp%.object_id%cct);
+        setGlobal('%.object_title%.cct', guverLamp%.object_id%.cct);
     }
-    function sendScene%.object_id%(val) {
-		alert(val);
-        setGlobal("%.object_title%.scene",val);
-		//callMethod('%.object_title%.setCct','value='+guverLamp%.object_id%cct);
+
+	// ================= Сцены =================
+    function populateSceneSelect%.object_id%() {
+		var select = document.getElementById('sceneSelect%.object_id%');
+		if (!select) return;
+
+		var sceneStr = getGlobal('%.object_title%.scenesList');
+		var currentScene = getGlobal('%.object_title%.workScene');
+
+		guverLamp%.object_id%.scenes = {};
+		if (sceneStr && typeof sceneStr === 'string') {
+			sceneStr.split(',').forEach(function(item) {
+				var parts = item.split('=');
+				if (parts.length === 2) {
+					var name = parts[0].trim();   // ← название сцены (key)
+					var code = parts[1].trim();   // ← код для Majordomo (value)
+					guverLamp%.object_id%.scenes[name] = code;
+				}
+			});
+		}
+
+		if (Object.keys(guverLamp%.object_id%.scenes).length === 0) {
+			select.innerHTML = '<option disabled selected>Сцен нет</option>';
+			return;
+		}
+
+		select.innerHTML = '';
+		Object.keys(guverLamp%.object_id%.scenes).forEach(function(name) {
+			var opt = document.createElement('option');
+			opt.value = guverLamp%.object_id%.scenes[name]; // → отправляем код
+			opt.textContent = name;                         // → показываем название
+			if (guverLamp%.object_id%.scenes[name] === currentScene)
+				opt.selected = true;
+			select.appendChild(opt);
+		});
+
+		guverLamp%.object_id%.workScene = currentScene;
+	}
+	
+	function sendScene%.object_id%(val) {
+		if (!val) return;
+
+		// обновляем код текущей сцены
+		guverLamp%.object_id%.workScene = val;
+
+		// находим название по коду
+		var sceneName = Object.keys(guverLamp%.object_id%.scenes).find(
+			key => guverLamp%.object_id%.scenes[key] === val
+		) || null;
+
+		// сохраняем имя в объекте
+		guverLamp%.object_id%.currentSceneName = sceneName;
+
+		// отправляем данные в Majordomo
+		setGlobal('%.object_title%.workScene', val);
+		if (sceneName) {
+			setGlobal('%.object_title%.sceneName', sceneName);
+		}
+	}
+	/*
+	function checkSceneUpdate%.object_id%() {
+        var select = document.getElementById('sceneSelect%.object_id%');
+        if (!select) return;
+        var currentScene = getGlobal('%.object_title%.workScene');
+        if (currentScene && currentScene !== select.value) {
+            select.value = currentScene;
+            guverLamp%.object_id%.workScene = currentScene;
+        }
     }
+	*/
+	$(document).ready(function() {
+        populateSceneSelect%.object_id%();
+        //setInterval(checkSceneUpdate%.object_id%, 2000); // проверка изменений сцены
+    });
 </script>
 
 <style>
@@ -53,20 +135,17 @@
 	<h5>🎨 Цветной свет</h5>
 	<input type="color"  value="%.color%" onchange="sendNewColor%.object_id%(this.value);">
 	<div class="device-details"><span id="guverLamp%.object_id%_colorBright">Яркость: %.colorBrightness%</span></div>
-	<input type="range" min="0" max="100" value="%.colorBrightness%" oninput="setColorBrightness%.object_id%(this.value);">
+	<input type="range" min="1" max="100" value="%.colorBrightness%" oninput="setColorBrightness%.object_id%(this.value);">
 
 	<h5>⚪ Белый свет</h5>
 	<div class="device-details"><span id="guverLamp%.object_id%_bright">Яркость: %.brightness%</span></div>
-	<input type="range" min="0" max="100" value="%.brightness%" oninput="setbrightness%.object_id%(this.value);">
+	<input type="range" min="1" max="100" value="%.brightness%" oninput="setbrightness%.object_id%(this.value);">
 	<div class="device-details"> <span id="guverLamp%.object_id%_cct">Температура: %.cct%</span></div>
-	<input type="range" min="0" max="100" value="%.cct%" oninput="setCCT%.object_id%(this.value);">
+	<input type="range" min="1" max="100" value="%.cct%" oninput="setCCT%.object_id%(this.value);">
 
 	<h5>🎨 Сцена</h5>
-	<select id="sceneSelect" oninput="sendScene%.object_id%(this.value);">
-	<option value="">%.scene%</option>
-	<option value="Romantic">Romantic</option>
-	<option value="0d0e0f101112131415161718">Вечеринка</option>
-	<option value="191a1b1c1d1e1f2021222324">Ночной</option>
-	</select>
+    <select id="sceneSelect%.object_id%" onchange="sendScene%.object_id%(this.value);">
+        <!-- Опции будут сгенерированы динамически -->
+    </select>
 </div>
 
