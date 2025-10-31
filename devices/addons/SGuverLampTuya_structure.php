@@ -22,7 +22,10 @@ $this->device_types['GuverLampTuya'] = array(
 		'colorBrightness' => array('DESCRIPTION' => 'Яркость (0<-->100)', 'ONCHANGE' => 'colorUpdated', 'DATA_KEY' => 1),
 		'colorWork' => array('DESCRIPTION' => 'Рабочий цвет.', 'ONCHANGE' => 'colorWorkUpdated'),
 		'colorSaved' => array('DESCRIPTION' => 'Сохраненный цвет.'),
-		'scene' => array('DESCRIPTION' => 'Сцена.'),
+		'work_mode' => array('DESCRIPTION' => 'Режим работы.'),
+		'workScene' => array('DESCRIPTION' => 'Рабочая сцена.', 'ONCHANGE' => 'sceneWorkUpdated'),
+		'scenesList' => array('DESCRIPTION' => 'Список сцен.'),
+		'sceneName' => array('DESCRIPTION' => 'Название текущей сцены.', 'DATA_KEY' => 1),
 	),
 	'METHODS' => array(
 		'brightnessUp' => array('DESCRIPTION' => 'Увеличить яркость белого.', '_CONFIG_SHOW' => 1, '_CONFIG_REQ_VALUE' => 1),
@@ -35,5 +38,6 @@ $this->device_types['GuverLampTuya'] = array(
 		'colorWorkUpdated' => array('DESCRIPTION' => 'Запускается при смене рабочего цвета'),
 		'colorBrightnessUp' => array('DESCRIPTION' => 'Увеличить яркость цвета.', '_CONFIG_SHOW' => 1, '_CONFIG_REQ_VALUE' => 1),
 		'colorBrightnessDown' => array('DESCRIPTION' => 'Уменьшить яркость цвета.', '_CONFIG_SHOW' => 1, '_CONFIG_REQ_VALUE' => 1),
+		'sceneWorkUpdated' => array('DESCRIPTION' => 'Запускается при смене рабочей сцены'),
 	),
 );

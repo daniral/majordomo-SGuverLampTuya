@@ -5,5 +5,5 @@
 */
 $cctLevel = $this->getProperty('cctLevel');
 $inc = isset($params['value']) && is_numeric($params['value']) ? max(1, min(100, $params['value'])):10;
-$cctLevel = max(0, $cctLevel - $inc);
+$cctLevel = max(1, $cctLevel - $inc);
 $this->setProperty('cct', $cctLevel);

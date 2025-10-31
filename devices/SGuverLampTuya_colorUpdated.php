@@ -1,5 +1,5 @@
 <?php
-//DebMes($params);
+
 if (!function_exists('rgbToHSVhex')) {
 	function rgbToHSVhex($rgbHex, $brightness = 100) {
 		// Убираем возможный символ "#"
@@ -48,11 +48,11 @@ if ($this->getProperty('colorBrightness') == '') $this->setProperty('colorBright
 if ($this->getProperty('color') == '') $this->setProperty('color', '#0000ff');
 
 $colorRGB = strtolower(trim($params['NEW_VALUE']));
-$colorRGBold = strtolower($params['OLD_VALUE']);
 $colorSaved = $this->getProperty('colorSaved');
-$colorBrightness = $this->getProperty('colorBrightness');
+$colorBrightness = max(1, min(100, $this->getProperty('colorBrightness')));
 $source = strtok($params['SOURCE'], " ");
 $property = $params['PROPERTY'];
+$status = $this->getProperty('status');
 
 $transform = array(
 	'red' => '#ff0000',
@@ -73,8 +73,10 @@ if($property == 'colorBrightness'){
 }
 
 if($source != 'colorWorkUpdated'){
+	$this->setProperty('work_mode', 'colour');
 	$hsvHex = rgbToHSVhex($colorRGB, $colorBrightness);
 	$this->setProperty('colorWork', $hsvHex, "colorUpdated");
+	if (!$status) $this->setProperty('status', 1);
 }
 
 $this->setProperty('colorSaved', $colorRGB);
