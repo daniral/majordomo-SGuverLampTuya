@@ -12,14 +12,17 @@ if(in_array($property, ['colorWork']) && !is_null($value) && $source != 'propert
 	$colorBrightness = $data['brightness'];
 	$colorRGB = $data['rgbHex'];
 	$this->setProperty('color', $colorRGB, 'worksUpdated');
+	$this->setProperty('colorSaved', $colorRGB);
 	$this->setProperty('colorBrightness', $colorBrightness, 'worksUpdated');
 }elseif(in_array($property, ['brightnessWork', 'cctWork']) && !is_null($value) && $source != 'propertysUpdated'){
 
 	$value=round($value / 10);
 	if($property == 'brightnessWork'){
 		$this->setProperty('brightness', $value, 'worksUpdated');
+		$this->setProperty('brightnessSaved', $value);
 	}elseif($property == 'cctWork'){
 		$this->setProperty('cct', $value, 'worksUpdated');
+		$this->setProperty('cctSaved', $value);
 	}
 }elseif(in_array($property, ['workScene']) && !is_null($params['NEW_VALUE']) && $source != 'propertysUpdated'){
 	$workScene = trim($params['NEW_VALUE'], " \t\n\r\0\x0B\"'");
