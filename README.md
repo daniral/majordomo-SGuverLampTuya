@@ -26,12 +26,12 @@
 | `turnOn` | Включить лампу | `callMethod('lamp.turnOn');` |
 | `turnOff` | Выключить лампу | `callMethod('lamp.turnOff');` |
 | `switch` | Переключить состояние | `callMethod('lamp.switch');` |
-| `brightnessDown` | Уменьшить яркость (по умолчанию −10) | `callMethod('lamp.brightnessDown', array("value"=>10));` |
-| `brightnessUp` | Увеличить яркость (по умолчанию +10) | `callMethod('lamp.brightnessUp');` |
-| `cctDown` | Уменьшить температуру белого | `callMethod('lamp.cctDown');` |
-| `cctUp` | Увеличить температуру белого | `callMethod('lamp.cctUp');` |
-| `colorBrightnessDown` | Уменьшить яркость цветного света | `callMethod('lamp.colorBrightnessDown');` |
-| `colorBrightnessUp` | Увеличить яркость цветного света | `callMethod('lamp.colorBrightnessUp');` |
+| `brightnessDown` | Уменьшить яркость белого(по умолчанию 10) | `callMethod('lamp.brightnessDown', array("value"=>1--100));` |
+| `brightnessUp` | Увеличить яркость белого(по умолчанию 10) | `callMethod('lamp.brightnessUp', array("value"=>1--100));` |
+| `cctDown` | Уменьшить температуру белого (по умолчанию 10) | `callMethod('lamp.cctDown', array("value"=>1--100));` |
+| `cctUp` | Увеличить температуру белого (по умолчанию 10) | `callMethod('lamp.cctUp', array("value"=>1--100));` |
+| `colorBrightnessDown` | Уменьшить яркость цветного света (по умолчанию 10)| `callMethod('lamp.colorBrightnessDown', array("value"=>1--100));` |
+| `colorBrightnessUp` | Увеличить яркость цветного света (по умолчанию 10) | `callMethod('lamp.colorBrightnessUp', array("value"=>1--100));` |
 
 ---
 
