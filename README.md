@@ -1,1 +1,34 @@
-# majordomo-SGuverLampTuya
+# **Лампа Гайвера от Tuya.**  
+## **Простое устройство для MajorDomo.**   
+Добавление в MajorDomo простого устройства для лампы Гайвера от Tuya.   
+Расширяет встроенный класс SControllers и добавляет класс SGuverLampTuya.  
+
+**Привязка свойства:**  
+
+- **switch_led --> status**  
+- **work_mode --> work_mode**  
+- **bright_value --> brightnessWork**  
+- **temp_valuec --> ctWork**  
+- **colour_datax --> colour_data**  
+- **scene_data --> workScene**  
+
+## **МЕТОДЫ:**  
+
+- **turnOn**   
+  - Включить - callMethod('имя объекта '.'turnOn');  
+- **turnOff**  
+  - Выключить - callMethod('имя объекта '.'turnOff');  
+- **brightnessDown**  
+  - Уменьшить яркость.(array("value"=>1--100)). Без  параметров 10.  
+- **brightnessUp**  
+  - Увеличить яркость.(array("value"=>1--100)). Без  параметров 10.  
+- **cctDown**  
+  - Уменьшить температуру.(array("value"=>1--100)). Без  параметров 10.  
+- **cctUp**  
+  - Увеличить температуру.(array("value"=>1--100)). Без  параметров 10.  
+- **colorBrightnessDown**  
+  - Уменьшить яркость цвета.(array("value"=>1--100)). Без  параметров 10.  
+- **colorBrightnessUp**  
+  - Увеличить яркость цвета.(array("value"=>1--100)). Без  параметров 10.  
+
+В свойстве **scenesList** хранится список готовых сцен в формате "Name=value,Name=value,...". Если поле пустое оно заполнится дефолтными значениями. Можно дополнить или полностью переписать на свои значения.  
