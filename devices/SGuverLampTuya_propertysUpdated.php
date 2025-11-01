@@ -6,7 +6,6 @@ if ($this->getProperty('brightness') == '') $this->setProperty('brightness', '50
 if ($this->getProperty('cct') == '') $this->setProperty('cct', '10');
 
 $value = $params['NEW_VALUE'];
-
 $transform = array(
 		'red' => '#ff0000',
 		'green' => '#00ff00',
@@ -24,25 +23,48 @@ $colorBrightness = normalizeRange($this->getProperty('colorBrightness'),1);
 $source = strtok($params['SOURCE'], " ") ?? null;
 $property = $params['PROPERTY'] ?? null;
 $status = $this->getProperty('status') ?? 0;
+$sceneName = trim($this->getProperty('sceneName'), " \t\n\r\0\x0B\"'");
+$sceneNameSaved = $this->getProperty('sceneNameSaved') ?? 'unknown';
 
 if(!is_null($value)) $this->setProperty($property , $value, 'worksUpdated');
 
-if(in_array($property, ['color', 'colorBrightness']) && !is_null($value)){
-	
+if(in_array($property, ['color', 'colorBrightness']) && !is_null($value) && $source != 'worksUpdated'){
 	if($property == 'colorBrightness')  $value = $colorSaved;
-
-	if($source != 'worksUpdated'){
-		$this->setProperty('work_mode', 'colour');
-		$hsvHex = rgbToHSVhex($value, $colorBrightness)?: '003c03e801f4';
-		$this->setProperty('colorWork', $hsvHex, "propertysUpdated");
-		if (!$status) $this->setProperty('status', 1);
-		$this->setProperty('colorSaved', $value);
+	$this->setProperty('work_mode', 'colour');
+	$hsvHex = rgbToHSVhex($value, $colorBrightness)?: '003c03e801f4';
+	$this->setProperty('colorWork', $hsvHex, 'propertysUpdated');
+	if (!$status) $this->setProperty('status', 1);
+	$this->setProperty('colorSaved', $value);
+}elseif(in_array($property, ['brightness', 'cct']) && is_numeric($value) && $source != 'worksUpdated'){
+	$this->setProperty('work_mode', 'white');
+	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
+	if (!$status) $this->setProperty('status', 1);
+	$this->setProperty($property . 'Saved', $value);
+}elseif(in_array($property, ['sceneName']) && $sceneName != 'unknown' && $source != 'worksUpdated'){
+	// Получаем список сцен и очищаем его от пробелов, кавычек и переводов строк по краям
+	$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
+	// Разбиваем на отдельные сцены (по запятой или новой строке)
+	$sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
+	$foundName = false;
+	foreach ($sceneItems as $item) {
+		// Каждая сцена имеет формат "Имя=Значение"
+		$parts = explode('=', $item, 2); // ограничиваем на 2, чтобы значения с '=' не ломали парсинг
+		if (count($parts) == 2) {
+			$name  = $parts[0];
+			$scene = $parts[1];
+			// Если имя совпадает, обновляем workScene
+			if ($name === $sceneName) {
+				$foundName = true;
+				$this->setProperty('work_mode', 'scene');
+				$this->setProperty('workScene', $scene, 'propertysUpdated');
+				$this->setProperty('sceneNameSaved', $name);
+				if (!$status) $this->setProperty('status', 1);
+				DebMes("pu Сцена '$name' → $scene");
+				break; // нашли нужную сцену, дальше не ищем
+			}
+		}
 	}
-}elseif(in_array($property, ['brightness', 'cct']) && is_numeric($value)){
-	if($source != 'worksUpdated'){
-		$this->setProperty('work_mode', 'white');
-		$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
-		if (!$status) $this->setProperty('status', 1);
-		$this->setProperty($property . 'Saved', $value);
+	if(!$foundName){
+		$this->setProperty('sceneName', $sceneNameSaved);
 	}
 }

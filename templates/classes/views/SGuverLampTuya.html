@@ -45,73 +45,108 @@
     }
 
 	// ================= Сцены =================
-    function populateSceneSelect%.object_id%() {
-		var select = document.getElementById('sceneSelect%.object_id%');
+	function populateSceneSelect%.object_id%() {
+		const select = document.getElementById('sceneSelect%.object_id%');
 		if (!select) return;
 
-		var sceneStr = getGlobal('%.object_title%.scenesList');
-		var currentScene = getGlobal('%.object_title%.workScene');
+		let sceneStr = getGlobal('%.object_title%.scenesList');
+		let currentSceneName = getGlobal('%.object_title%.sceneName');
 
-		guverLamp%.object_id%.scenes = {};
+		guverLamp%.object_id%.scenes = [];
+
+		// Функция для "расширенного trim"
+		// убираем пробелы, кавычки, запятые и т.п. по краям
+		function cleanString(str) {
+			return (str || '')
+				.replace(/^[\s"'`;,.]+|[\s"'`;,.]+$/g, '')
+				.trim();
+		}
+
+		// Очистка списка и парсинг
 		if (sceneStr && typeof sceneStr === 'string') {
-			sceneStr.split(',').forEach(function(item) {
-				var parts = item.split('=');
-				if (parts.length === 2) {
-					var name = parts[0].trim();   // ← название сцены (key)
-					var code = parts[1].trim();   // ← код для Majordomo (value)
-					guverLamp%.object_id%.scenes[name] = code;
+			sceneStr = cleanString(sceneStr);
+
+			sceneStr.split(',').forEach(item => {
+				const parts = item.split('=');
+				if (parts.length >= 1) {
+					const name = cleanString(parts[0]);
+					if (name) guverLamp%.object_id%.scenes.push(name);
 				}
 			});
 		}
 
-		if (Object.keys(guverLamp%.object_id%.scenes).length === 0) {
-			select.innerHTML = '<option disabled selected>Сцен нет</option>';
+		select.innerHTML = '';
+
+		// Если сцен нет
+		if (guverLamp%.object_id%.scenes.length === 0) {
+			const opt = document.createElement('option');
+			opt.disabled = true;
+			opt.selected = true;
+			opt.textContent = 'Сцен нет';
+			select.appendChild(opt);
 			return;
 		}
 
-		select.innerHTML = '';
-		Object.keys(guverLamp%.object_id%.scenes).forEach(function(name) {
-			var opt = document.createElement('option');
-			opt.value = guverLamp%.object_id%.scenes[name]; // → отправляем код
-			opt.textContent = name;                         // → показываем название
-			if (guverLamp%.object_id%.scenes[name] === currentScene)
-				opt.selected = true;
+		// Если текущая сцена неизвестна
+		if (currentSceneName && cleanString(currentSceneName) === 'unknown') {
+			const unknownOpt = document.createElement('option');
+			unknownOpt.value = 'unknown';
+			unknownOpt.textContent = 'Неизвестная сцена';
+			unknownOpt.selected = true;
+			select.appendChild(unknownOpt);
+		}
+
+		// Добавляем все сцены
+		guverLamp%.object_id%.scenes.forEach(name => {
+			const opt = document.createElement('option');
+			opt.value = name;
+			opt.textContent = name;
+			if (cleanString(currentSceneName) === name) opt.selected = true;
 			select.appendChild(opt);
 		});
 
-		guverLamp%.object_id%.workScene = currentScene;
+		guverLamp%.object_id%.currentSceneName = cleanString(currentSceneName);
 	}
-	
-	function sendScene%.object_id%(val) {
-		if (!val) return;
 
-		// обновляем код текущей сцены
-		guverLamp%.object_id%.workScene = val;
-
-		// находим название по коду
-		var sceneName = Object.keys(guverLamp%.object_id%.scenes).find(
-			key => guverLamp%.object_id%.scenes[key] === val
-		) || null;
-
-		// сохраняем имя в объекте
-		guverLamp%.object_id%.currentSceneName = sceneName;
-
-		// отправляем данные в Majordomo
-		setGlobal('%.object_title%.workScene', val);
-		if (sceneName) {
-			setGlobal('%.object_title%.sceneName', sceneName);
+	// Отправка выбранной сцены
+	function sendScene%.object_id%(sceneName) {
+		if (!sceneName) {
+			setGlobal('%.object_title%.sceneName', 'none');
+			guverLamp%.object_id%.currentSceneName = null;
+			return;
 		}
+
+		sceneName = sceneName.replace(/^[\s"'`;,.]+|[\s"'`;,.]+$/g, '').trim();
+		guverLamp%.object_id%.currentSceneName = sceneName;
+		setGlobal('%.object_title%.sceneName', sceneName);
 	}
+
 	/*
 	function checkSceneUpdate%.object_id%() {
-        var select = document.getElementById('sceneSelect%.object_id%');
-        if (!select) return;
-        var currentScene = getGlobal('%.object_title%.workScene');
-        if (currentScene && currentScene !== select.value) {
-            select.value = currentScene;
-            guverLamp%.object_id%.workScene = currentScene;
-        }
-    }
+		const select = document.getElementById('sceneSelect%.object_id%');
+		if (!select) return;
+
+		let currentSceneName = getGlobal('%.object_title%.sceneName');
+		if (!currentSceneName) return;
+
+		currentSceneName = currentSceneName.replace(/^[\s"'`;,.]+|[\s"'`;,.]+$/g, '').trim();
+
+		if (currentSceneName === 'unknown') {
+			if (!select.querySelector('option[value="unknown"]')) {
+				const unknownOpt = document.createElement('option');
+				unknownOpt.value = 'unknown';
+				unknownOpt.textContent = 'Неизвестная сцена';
+				select.insertBefore(unknownOpt, select.firstChild);
+			}
+			select.value = 'unknown';
+			return;
+		}
+
+		if (select.value !== currentSceneName) {
+			select.value = currentSceneName;
+			guverLamp%.object_id%.currentSceneName = currentSceneName;
+		}
+	}
 	*/
 	$(document).ready(function() {
         populateSceneSelect%.object_id%();
