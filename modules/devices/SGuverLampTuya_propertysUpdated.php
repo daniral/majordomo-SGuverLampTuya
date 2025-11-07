@@ -59,7 +59,6 @@ if(in_array($property, ['color', 'colorBrightness']) && !is_null($value) && $sou
 				$this->setProperty('workScene', $scene, 'propertysUpdated');
 				$this->setProperty('sceneNameSaved', $name);
 				if (!$status) $this->setProperty('status', 1);
-				DebMes("pu Сцена '$name' → $scene");
 				break; // нашли нужную сцену, дальше не ищем
 			}
 		}
