@@ -82,7 +82,7 @@ $transform = array(
 	);
 if (isset($transform[$value])) $value = $transform[$value];
 
-$value = normalizeRange($value);
+$value = normalizeRange($value,1);
 $colorSaved = $this->getProperty('colorSaved') ?? '#ffff00';
 $colorLevel = normalizeRange($this->getProperty('colorLevel'),1);
 $sceneName = trim($this->getProperty('sceneName'), " \t\n\r\0\x0B\"'");
