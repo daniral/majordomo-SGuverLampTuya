@@ -12,7 +12,7 @@
 |----------------|----------------------|-----------|
 | `switch_led`   | `status`             | Включение / выключение лампы |
 | `work_mode`    | `work_mode`          | Режим работы (белый, цветной, сцена и т.п.) |
-| `bright_value` | `brightnessWork`     | Яркость белого света |
+| `bright_value` | `levelWork`     | Яркость белого света |
 | `temp_valuec`  | `ctWork`             | Цветовая температура |
 | `colour_datax` | `colour_data`        | Цвет RGB в HEX |
 | `scene_data`   | `workScene`          | Активная сцена |

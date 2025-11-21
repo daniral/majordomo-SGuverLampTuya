@@ -1,9 +1,15 @@
 <?php
+/**
+ * Увеличивает температуру белого цвета лампы.
+ *     callMethod('имя объекта.cctUp', array("value"=>1--100));
+ * Если передан массив с ключом `value`, температура увеличивается на указанное значение (1–100%).
+ * Если параметр не передан, используется значение по умолчанию: 10.
+ *
+ * @param array{
+ *     value?: int|string|null   // На сколько увеличить температуру (1–100)
+ * } $params Ассоциативный массив параметров.
+ *
+ * @return void
+ */
 
-/*
-Увеличить температуру.(array("value"=>1--100)). Без  параметров +10.
-*/
-$cctLevel = $this->getProperty('cctLevel');
-$inc = isset($params['value']) && is_numeric($params['value']) ? max(1, min(100, $params['value'])):10;
-$cctLevel = min(100, $cctLevel + $inc);
-$this->setProperty('cct', $cctLevel);
+adjustProperty($this, 'cct', $params['value'] ?? null, 'up');

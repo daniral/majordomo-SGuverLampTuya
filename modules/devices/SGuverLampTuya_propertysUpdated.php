@@ -1,46 +1,108 @@
 <?php
 
-if ($this->getProperty('colorBrightness') == '') $this->setProperty('colorBrightness', '50');
-if ($this->getProperty('color') == '') $this->setProperty('color', '#ffff00');
-if ($this->getProperty('brightness') == '') $this->setProperty('brightness', '50');
-if ($this->getProperty('cct') == '') $this->setProperty('cct', '10');
+/**
+ * Обновление свойств устройства SGuverLampTuya (Лампа Гайвера Tuya).
+ *
+ * Этот метод обрабатывает изменения свойств устройства, включая:
+ * - Белый свет (level, cct)
+ * - Цветной свет (color, colorLevel)
+ * - Сценарии (sceneName)
+ *
+ * При изменении свойств выполняются следующие действия:
+ * - Обновление рабочей копии свойства (Work)
+ * - Сохранение текущего значения (Saved)
+ * - Перевод в соответствующий режим работы (white/colour/scene)
+ * - Вызов функций обратного обновления (`propertysUpdated`, `worksUpdated`)
+ * - Обновление статуса устройства (status)
+ *
+ * Входные параметры берутся из $params:
+ *   - SOURCE: строка, источник изменения свойства
+ *   - PROPERTY: имя свойства, которое изменилось
+ *   - NEW_VALUE: новое значение свойства
+ *
+ * Обработка цветов:
+ *   - Поддерживаются стандартные цвета (red, green, blue, white, yellow, cyan, magenta, orange, purple, pink, lime)
+ *   - Цвета преобразуются в HEX формат
+ *   - colorLevel используется для управления яркостью цвета
+ *
+ * Обработка сцен:
+ *   - Список сцен хранится в свойстве scenesList в формате "Имя=Значение"
+ *   - Рабочая сцена устанавливается в workScene
+ *   - При совпадении имени сцены с sceneName сохраняется состояние
+ *
+ * Особенности:
+ *   - Защита от рекурсивного вызова при source = 'worksUpdated'
+ *   - Нормализация значений цвета и яркости через normalizeRange()
+ *   - Преобразование цвета из слов в HEX
+ *
+ * @global int $status Текущий статус устройства (0 или 1)
+ * @global string $colorSaved Последний сохранённый цвет
+ * @global string $sceneNameSaved Последняя сохранённая сцена
+ *
+ * @param array $params {
+ *     Входные параметры для обновления свойств устройства.
+ *
+ *     @type string SOURCE Источник изменения свойства (например, 'user', 'worksUpdated')
+ *     @type string PROPERTY Имя изменяемого свойства ('level', 'cct', 'color', 'colorLevel', 'sceneName')
+ *     @type mixed  NEW_VALUE Новое значение свойства (число или строка)
+ * }
+ *
+ * @return void
+ *
+ * @see normalizeRange() Функция нормализации значений
+ * @see rgbToHSVhex() Преобразование RGB цвета в HSV hex
+ * @see setProperty() Метод устройства для обновления свойства
+ */
+
+
+if ($this->getProperty('colorLevel') === '') $this->setProperty('colorLevel', '50');
+if ($this->getProperty('color') === '') $this->setProperty('color', '#ffff00');
+if ($this->getProperty('level') === '') $this->setProperty('level', '50');
+if ($this->getProperty('cct') === '') $this->setProperty('cct', '10');
+
+$source = strtok($params['SOURCE'], " ") ?? null;
+$property = $params['PROPERTY'] ?? null;
+$status = $this->getProperty('status') ?? 0;
+
+if($source === 'worksUpdated') return;
 
 $value = $params['NEW_VALUE'];
 $transform = array(
-		'red' => '#ff0000',
-		'green' => '#00ff00',
-		'blue' => '#0000ff',
-		'yellow' => '#ffff00',
-		'aqua'  => '#00ffff',
-		'magenta' => '#ff00ff',
-		'white' => '#ffffff'
-		);
+	'red'      => '#ff0000',
+	'green'    => '#00ff00',
+	'blue'     => '#0000ff',
+	'white'    => '#ffffff',
+	'yellow'   => '#ffff00',
+	'cyan'     => '#00ffff',
+	'magenta'  => '#ff00ff',
+	'orange'   => '#ffa500',
+	'purple'   => '#800080',
+	'pink'     => '#ffc0cb',
+	'lime'     => '#00ff00'
+	);
 if (isset($transform[$value])) $value = $transform[$value];
 
 $value = normalizeRange($value);
 $colorSaved = $this->getProperty('colorSaved') ?? '#ffff00';
-$colorBrightness = normalizeRange($this->getProperty('colorBrightness'),1);
-$source = strtok($params['SOURCE'], " ") ?? null;
-$property = $params['PROPERTY'] ?? null;
-$status = $this->getProperty('status') ?? 0;
+$colorLevel = normalizeRange($this->getProperty('colorLevel'),1);
 $sceneName = trim($this->getProperty('sceneName'), " \t\n\r\0\x0B\"'");
 $sceneNameSaved = $this->getProperty('sceneNameSaved') ?? 'unknown';
 
 if(!is_null($value)) $this->setProperty($property , $value, 'worksUpdated');
 
-if(in_array($property, ['color', 'colorBrightness']) && !is_null($value) && $source != 'worksUpdated'){
-	if($property == 'colorBrightness')  $value = $colorSaved;
+if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
+	if($property == 'colorLevel')  $value = $colorSaved;
 	$this->setProperty('work_mode', 'colour');
-	$hsvHex = rgbToHSVhex($value, $colorBrightness)?: '003c03e801f4';
+	$hsvHex = rgbToHSVhex($value, $colorLevel)?: '003c03e801f4';
 	$this->setProperty('colorWork', $hsvHex, 'propertysUpdated');
 	if (!$status) $this->setProperty('status', 1);
 	$this->setProperty('colorSaved', $value);
-}elseif(in_array($property, ['brightness', 'cct']) && is_numeric($value) && $source != 'worksUpdated'){
+}elseif(in_array($property, ['level', 'cct']) && is_numeric($value)){
 	$this->setProperty('work_mode', 'white');
 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
 	if (!$status) $this->setProperty('status', 1);
 	$this->setProperty($property . 'Saved', $value);
-}elseif(in_array($property, ['sceneName']) && $sceneName != 'unknown' && $source != 'worksUpdated'){
+}elseif(in_array($property, ['sceneName']) && $sceneName != 'unknown'){
 	// Получаем список сцен и очищаем его от пробелов, кавычек и переводов строк по краям
 	$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
 	// Разбиваем на отдельные сцены (по запятой или новой строке)

@@ -1,9 +1,15 @@
 <?php
+/**
+ * Уменьшает температуру белого цвета лампы.
+ *     callMethod('имя объекта.cctDown', array("value"=>1--100));
+ * Если передан массив с ключом `value`, температура уменьшается на указанное значение (1–100%).
+ * Если параметр не передан, используется значение по умолчанию: 10.
+ *
+ * @param array{
+ *     value?: int|string|null   // На сколько уменьшить температуру (1–100)
+ * } $params Ассоциативный массив параметров.
+ *
+ * @return void
+ */
 
-/*
-Уменьшить температуру.(array("value"=>1--100)). Без  параметров -10.
-*/
-$cctLevel = $this->getProperty('cctLevel');
-$inc = isset($params['value']) && is_numeric($params['value']) ? max(1, min(100, $params['value'])):10;
-$cctLevel = max(1, $cctLevel - $inc);
-$this->setProperty('cct', $cctLevel);
+adjustProperty($this, 'cct', $params['value'] ?? null, 'down');

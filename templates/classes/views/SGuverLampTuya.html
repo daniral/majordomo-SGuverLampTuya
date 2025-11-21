@@ -1,162 +1,373 @@
 <script type="text/javascript">
-    // создаём объект для текущей лампы, если его нет
-    if (typeof window.guverLamp === 'undefined') window.guverLamp = {};
+
+/**
+ * ==========================================================
+ * GuverLamp Widget для MajorDoMo
+ * ==========================================================
+ *
+ * Описание:
+ * Этот файл реализует виджет управления лампой с цветным и белым светом,
+ * яркостью, цветовой температурой и сценами.
+ * Использует глобальный объект `window.guverLamp` для хранения состояния лампы.
+ *
+ * Плейсхолдеры, заменяемые сервером:
+ * %.object_id%           - уникальный ID лампы
+ * %.object_title%        - название объекта в MajorDoMo
+ * %.color%               - HEX цвет цветного света
+ * %.colorLevel%          - яркость цветного света (1-100)
+ * %.level%               - яркость белого света (0-100)
+ * %.cct%                 - цветовая температура (0-100)
+ * %.loadType%            - тип загрузки виджета
+ * %.status%              - статус лампы (on/off)
+ * %.icon%                - иконка устройства
+ * %.object_description%  - описание устройства
+ *
+ * ==========================================================
+ * Глобальный объект lamp:
+ * window.guverLamp[object_id] = {
+ *   currentColor: string,          // текущий цвет (#HEX)
+ *   colorLevel: number,            // яркость цветного света (1-100)
+ *   level: number,                 // яркость белого света (0-100)
+ *   cct: number,                   // цветовая температура (0-100)
+ *   currentSceneName: string|null, // текущая сцена
+ *   scenes: string[],              // список доступных сцен
+ *   dragging: boolean,             // флаг перетаскивания ползунка
+ *   colorLevelTimeout: number|null,// таймер debounce colorLevel
+ *   levelTimeout: number|null,     // таймер debounce level
+ *   cctTimeout: number|null        // таймер debounce cct
+ * }
+ *
+ * ==========================================================
+ * Функции:
+ *
+ * sendNewColor%.object_id%(val)
+ *   - Обновляет цвет лампы и фон слайдера цветного света.
+ *   - @param {string} val - HEX цвет
+ *
+ * previewColorLevel%.object_id%(val)
+ *   - Предварительный просмотр изменения яркости цветного света.
+ *   - @param {number|string} val - яркость (1-100)
+ *
+ * sendNewColorLevel%.object_id%()
+ *   - Отправка нового значения яркости цветного света (debounce 500ms)
+ *
+ * previewLevel%.object_id%(val)
+ *   - Предварительный просмотр изменения яркости белого света.
+ *   - @param {number|string} val - яркость (0-100)
+ *
+ * sendNewLevel%.object_id%()
+ *   - Отправка нового значения яркости белого света (debounce 500ms)
+ *
+ * previewCct%.object_id%(val)
+ *   - Предварительный просмотр изменения цветовой температуры.
+ *   - @param {number|string} val - значение CCT (0-100)
+ *
+ * sendNewCct%.object_id%()
+ *   - Отправка нового значения цветовой температуры (debounce 500ms)
+ *
+ * populateSceneSelect%.object_id%()
+ *   - Заполняет select доступными сценами.
+ *   - Если текущая сцена "unknown" — добавляет опцию "Неизвестная сцена".
+ *
+ * sendScene%.object_id%(sceneName)
+ *   - Отправка выбранной сцены на сервер и обновление текущей сцены.
+ *   - @param {string|null} sceneName - название сцены или null
+ *
+ * updateSliderFill(selector, value, color)
+ *   - Обновляет фон слайдера (range) в зависимости от текущего значения.
+ *   - @param {string} selector - CSS-селектор input[type=range]
+ *   - @param {number} value - значение слайдера (0-100)
+ *   - @param {string} color - цвет до текущего значения
+ *
+ * cleanString(str)
+ *   - Приведение строки к нижнему регистру и удаление лишних пробелов.
+ *   - @param {string} str - входная строка
+ *   - @returns {string} очищенная строка
+ *
+ * HTML элементы:
+ *   - #guverLamp%.object_id%_colorLevelTxt - текст яркости цветного света
+ *   - #guverLamp%.object_id%_levelTxt - текст яркости белого света
+ *   - #guverLamp%.object_id%_cctTxt - текст цветовой температуры
+ *   - #guverLamp%.object_id%_colorLevel - слайдер цветного света
+ *   - #guverLamp%.object_id%_level - слайдер белого света
+ *   - #guverLamp%.object_id%_cct - слайдер цветовой температуры
+ *   - #guverLamp%.object_id%_sceneSelect - select для сцен
+ *
+ */
+
+
+	// создаём объект для текущей лампы, если его нет
+	if (typeof window.guverLamp === 'undefined') window.guverLamp = {};
     if (typeof window.guverLamp%.object_id% === 'undefined') {
         window.guverLamp%.object_id% = {
-            brightness: %.brightness% || 50,
-			colorBrightness: %.colorBrightness% || 50,
-			cct: %.cct% || 10,
-			workScene: null,
-			scenes: {}
+			currentColor: '%.color%',
+            colorLevel: %.colorLevel% || 50,
+            level: %.level% || 50,
+            cct: %.cct% || 10,
+            currentSceneName: null,
+            scenes: [],
+            dragging: false,
+
+            // таймеры debounce – ХРАНИМ ЗДЕСЬ, а НЕ в глобальных let
+            colorLevelTimeout: null,
+            levelTimeout: null,
+            cctTimeout: null
         };
     }
 
     // ================= Цветной свет =================
     function sendNewColor%.object_id%(val) {
+		let lamp = window.guverLamp%.object_id%;
+		lamp.currentColor = val;  
         setGlobal('%.object_title%.color', val);
+		// обновляем цвет фона у слайдера ЯРКОСТИ ЦВЕТА
+		updateSliderFill('#guverLamp%.object_id%_colorLevel', lamp.colorLevel, val);
     }
-    function setColorBrightness%.object_id%(val) {
-        guverLamp%.object_id%.colorBrightness = val;
-        $('#guverLamp%.object_id%_colorBright').html("Яркость: " + guverLamp%.object_id%.colorBrightness);
-        sendNewColorbrightness%.object_id%();
+
+    function previewColorLevel%.object_id%(val) {
+        val = parseInt(val);
+        let lamp = window.guverLamp%.object_id%;
+
+        lamp.dragging = true;
+        lamp.colorLevel = val;
+        $('#guverLamp%.object_id%_colorLevelTxt').text("Яркость: " + val + "%");
+        updateSliderFill('#guverLamp%.object_id%_colorLevel', val, lamp.currentColor);
     }
-    function sendNewColorbrightness%.object_id%() {
-        setGlobal('%.object_title%.colorBrightness', guverLamp%.object_id%.colorBrightness);
+
+    function sendNewColorLevel%.object_id%() {
+        let lamp = window.guverLamp%.object_id%;
+        lamp.dragging = false;
+
+        clearTimeout(lamp.colorLevelTimeout);
+        lamp.colorLevelTimeout = setTimeout(() => {
+            callMethod('%.object_title%.setColorLevel', 'value=' + lamp.colorLevel);
+        }, 500);
     }
 
     // ================= Белый свет =================
-    function setbrightness%.object_id%(val) {
-        guverLamp%.object_id%.brightness = val;
-        $('#guverLamp%.object_id%_bright').html("Яркость: " + guverLamp%.object_id%.brightness);
-        sendNewbrightness%.object_id%();
-    }
-    function sendNewbrightness%.object_id%() {
-        setGlobal('%.object_title%.brightness', guverLamp%.object_id%.brightness);
-    }
+    function previewLevel%.object_id%(val) {
+        val = parseInt(val);
+        let lamp = window.guverLamp%.object_id%;
 
-    // ================= CCT =================
-    function setCCT%.object_id%(val) {
-        guverLamp%.object_id%.cct = val;
-        $('#guverLamp%.object_id%_cct').html("Температура: " + guverLamp%.object_id%.cct);
-        sendNewCCT%.object_id%();
-    }
-    function sendNewCCT%.object_id%() {
-        setGlobal('%.object_title%.cct', guverLamp%.object_id%.cct);
+        lamp.dragging = true;
+        lamp.level = val;
+
+        $('#guverLamp%.object_id%_levelTxt').text("Яркость: " + val + "%");
+        updateSliderFill('#guverLamp%.object_id%_level', val, '#4CAF50');
     }
 
-	// ================= Сцены =================
-	function populateSceneSelect%.object_id%() {
-		const select = document.getElementById('sceneSelect%.object_id%');
-		if (!select) return;
+    function sendNewLevel%.object_id%() {
+        let lamp = window.guverLamp%.object_id%;
+        lamp.dragging = false;
 
-		let sceneStr = getGlobal('%.object_title%.scenesList');
-		let currentSceneName = getGlobal('%.object_title%.sceneName');
+        clearTimeout(lamp.levelTimeout);
+        lamp.levelTimeout = setTimeout(() => {
+            callMethod('%.object_title%.setLevel', 'value=' + lamp.level);
+        }, 500);
+    }
 
-		guverLamp%.object_id%.scenes = [];
+    // ===== Цветовая температура =====
+    function previewCct%.object_id%(val) {
+        val = parseInt(val);
+        let lamp = window.guverLamp%.object_id%;
 
-		// Функция для "расширенного trim"
-		// убираем пробелы, кавычки, запятые и т.п. по краям
-		function cleanString(str) {
-			return (str || '')
-				.replace(/^[\s"'`;,.]+|[\s"'`;,.]+$/g, '')
-				.trim();
-		}
+        lamp.dragging = true;
+        lamp.cct = val;
 
-		// Очистка списка и парсинг
-		if (sceneStr && typeof sceneStr === 'string') {
-			sceneStr = cleanString(sceneStr);
+        $('#guverLamp%.object_id%_cctTxt').text("Температура: " + val + "%");
+        updateSliderFill('#guverLamp%.object_id%_cct', val, '#f7a800');
+    }
 
-			sceneStr.split(',').forEach(item => {
-				const parts = item.split('=');
-				if (parts.length >= 1) {
-					const name = cleanString(parts[0]);
-					if (name) guverLamp%.object_id%.scenes.push(name);
-				}
-			});
-		}
+    function sendNewCct%.object_id%() {
+        let lamp = window.guverLamp%.object_id%;
+        lamp.dragging = false;
 
-		select.innerHTML = '';
+        clearTimeout(lamp.cctTimeout);
+        lamp.cctTimeout = setTimeout(() => {
+            callMethod('%.object_title%.setCct', 'value=' + lamp.cct);
+        }, 500);
+    }
 
-		// Если сцен нет
-		if (guverLamp%.object_id%.scenes.length === 0) {
-			const opt = document.createElement('option');
-			opt.disabled = true;
-			opt.selected = true;
-			opt.textContent = 'Сцен нет';
-			select.appendChild(opt);
-			return;
-		}
+    // ================= Сцены =================
+    function populateSceneSelect%.object_id%() {
+        const select = document.getElementById('guverLamp%.object_id%_sceneSelect');
+        if (!select) return;
 
+        const lamp = window.guverLamp%.object_id%;
+
+        let sceneStr = getGlobal('%.object_title%.scenesList');
+        let currentSceneName = getGlobal('%.object_title%.sceneName') || 'none';
+        lamp.currentSceneName = currentSceneName;
+
+        lamp.scenes = [];
+
+        if (sceneStr && typeof sceneStr === 'string') {
+            sceneStr.split(',').forEach(item => {
+                const name = item.split('=')[0].trim();
+                if (name) lamp.scenes.push(name);
+            });
+        }
+
+        select.innerHTML = '';
+
+        if (lamp.scenes.length === 0) {
+            const opt = document.createElement('option');
+            opt.disabled = true;
+            opt.selected = true;
+            opt.textContent = 'Сцен нет';
+            select.appendChild(opt);
+            return;
+        }
+		
 		// Если текущая сцена неизвестна
-		if (currentSceneName && cleanString(currentSceneName) === 'unknown') {
+		if (currentSceneName  === 'unknown') {
 			const unknownOpt = document.createElement('option');
 			unknownOpt.value = 'unknown';
 			unknownOpt.textContent = 'Неизвестная сцена';
 			unknownOpt.selected = true;
 			select.appendChild(unknownOpt);
 		}
+		
+        lamp.scenes.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            if (name === currentSceneName) {
+                opt.selected = true;
+                opt.style.background = '#4CAF50';
+                opt.style.color = 'white';
+            }
+            select.appendChild(opt);
+        });
+    }
 
-		// Добавляем все сцены
-		guverLamp%.object_id%.scenes.forEach(name => {
-			const opt = document.createElement('option');
-			opt.value = name;
-			opt.textContent = name;
-			if (cleanString(currentSceneName) === name) opt.selected = true;
-			select.appendChild(opt);
-		});
+    function sendScene%.object_id%(sceneName) {
+        const lamp = window.guverLamp%.object_id%;
 
-		guverLamp%.object_id%.currentSceneName = cleanString(currentSceneName);
-	}
+        if (!sceneName) {
+            setGlobal('%.object_title%.sceneName', 'none');
+            lamp.currentSceneName = null;
+            populateSceneSelect%.object_id%();
+            return;
+        }
 
-	// Отправка выбранной сцены
-	function sendScene%.object_id%(sceneName) {
-		if (!sceneName) {
-			setGlobal('%.object_title%.sceneName', 'none');
-			guverLamp%.object_id%.currentSceneName = null;
-			return;
-		}
+        sceneName = sceneName.trim();
+        lamp.currentSceneName = sceneName;
 
-		sceneName = sceneName.replace(/^[\s"'`;,.]+|[\s"'`;,.]+$/g, '').trim();
-		guverLamp%.object_id%.currentSceneName = sceneName;
-		setGlobal('%.object_title%.sceneName', sceneName);
-	}
-
-	/*
-	function checkSceneUpdate%.object_id%() {
-		const select = document.getElementById('sceneSelect%.object_id%');
-		if (!select) return;
-
-		let currentSceneName = getGlobal('%.object_title%.sceneName');
-		if (!currentSceneName) return;
-
-		currentSceneName = currentSceneName.replace(/^[\s"'`;,.]+|[\s"'`;,.]+$/g, '').trim();
-
-		if (currentSceneName === 'unknown') {
-			if (!select.querySelector('option[value="unknown"]')) {
-				const unknownOpt = document.createElement('option');
-				unknownOpt.value = 'unknown';
-				unknownOpt.textContent = 'Неизвестная сцена';
-				select.insertBefore(unknownOpt, select.firstChild);
-			}
-			select.value = 'unknown';
-			return;
-		}
-
-		if (select.value !== currentSceneName) {
-			select.value = currentSceneName;
-			guverLamp%.object_id%.currentSceneName = currentSceneName;
-		}
-	}
-	*/
-	$(document).ready(function() {
+        setGlobal('%.object_title%.sceneName', sceneName);
         populateSceneSelect%.object_id%();
-        //setInterval(checkSceneUpdate%.object_id%, 2000); // проверка изменений сцены
+    }
+	
+	// --- Обновление фона ползунка ---
+	function updateSliderFill(selector, value, color) {
+	  const slider = document.querySelector(selector);
+	  const percentage = value;
+	  slider.style.background = `linear-gradient(90deg, ${color} ${percentage}%, #ddd ${percentage}%)`;
+	}
+
+    $(document).ready(function() {
+        updateSliderFill('#guverLamp%.object_id%_colorLevel', %.colorLevel%, '%.color%');
+        updateSliderFill('#guverLamp%.object_id%_level', %.level%, '#4CAF50');
+        updateSliderFill('#guverLamp%.object_id%_cct', %.cct%, '#f7a800');
+        populateSceneSelect%.object_id%();
     });
+
 </script>
 
 <style>
-	.card { background:#f4f4f4; border-radius:12px; padding:15px; box-shadow:0 2px 6px rgba(0,0,0,0.15); margin: 15px 0 15px 50px;}
-	input[type=color], input[type=range], select { width:100%; box-sizing:border-box; margin-bottom:8px;}
+/* Стили для карточки */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  margin: 20px 0 20px 50px;
+  max-width: 320px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Стили для яркости и цвета */
+.device-details p {
+  margin: 8px 0 4px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Цвет */
+input[type=color] {
+  width: 100%;
+}
+
+/* Слайдеры */
+
+input[type=range] {
+  width: 100%;
+  height: 8px;
+  border-radius: 5px;
+  outline: none;
+  background: linear-gradient(90deg, #ddd 0%, #ddd 0%);
+  transition: background 0.2s ease;
+  -webkit-appearance: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid currentColor;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+#guverLamp%.object_id%_level {
+  color: #4CAF50;
+}
+#guverLamp%.object_id%_cct {
+  color: #f7a800;
+}
+#guverLamp%.object_id%_colorLevel {
+  color: %.color%;
+}
+
+/* --- Стили кастомного селекта --- */
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.select-wrapper select {
+  width: 100%;
+  padding: 6px 16px; 
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #f4f4f4;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.select-wrapper select:focus {
+  border-color: #4CAF50;
+  background-color: #fff;
+  outline: none;
+}
+
+
+/* Опционально: плавное изменение фона при наведении */
+.select-wrapper select:hover {
+  background-color: #eaeaea;
+}
 </style>
 	
 <div class="device-widget controller loadtype_%.loadType%">
@@ -167,20 +378,49 @@
 </div>
 
 <div class="card">
+  <div class="device-details">
 	<h5>🎨 Цветной свет</h5>
-	<input type="color"  value="%.color%" onchange="sendNewColor%.object_id%(this.value);">
-	<div class="device-details"><span id="guverLamp%.object_id%_colorBright">Яркость: %.colorBrightness%</span></div>
-	<input type="range" min="1" max="100" value="%.colorBrightness%" oninput="setColorBrightness%.object_id%(this.value);">
+	<input type="color"  
+		   value="%.color%" 
+		   onchange="sendNewColor%.object_id%(this.value);">
+		   
+    <p id="guverLamp%.object_id%_colorLevelTxt">Яркость: %.colorLevel%%</p>
+    <input id="guverLamp%.object_id%_colorLevel" 
+           type="range" min="1" max="100" step="1"
+           value="%.colorLevel%" 
+           oninput="previewColorLevel%.object_id%(this.value)"
+           onmouseup="sendNewColorLevel%.object_id%()"
+           ontouchend="sendNewColorLevel%.object_id%()"> 
 
 	<h5>⚪ Белый свет</h5>
-	<div class="device-details"><span id="guverLamp%.object_id%_bright">Яркость: %.brightness%</span></div>
-	<input type="range" min="1" max="100" value="%.brightness%" oninput="setbrightness%.object_id%(this.value);">
-	<div class="device-details"> <span id="guverLamp%.object_id%_cct">Температура: %.cct%</span></div>
-	<input type="range" min="1" max="100" value="%.cct%" oninput="setCCT%.object_id%(this.value);">
+    <p id="guverLamp%.object_id%_levelTxt">Яркость: %.level%%</p>
+    <input id="guverLamp%.object_id%_level" 
+           type="range" min="0" max="100" step="1"
+           value="%.level%" 
+           oninput="previewLevel%.object_id%(this.value)"
+           onmouseup="sendNewLevel%.object_id%()"
+           ontouchend="sendNewLevel%.object_id%()">
 
-	<h5>🎨 Сцена</h5>
-    <select id="sceneSelect%.object_id%" onchange="sendScene%.object_id%(this.value);">
-        <!-- Опции будут сгенерированы динамически -->
-    </select>
+    <p id="guverLamp%.object_id%_cctTxt">Температура: %.cct%%</p>
+    <input id="guverLamp%.object_id%_cct" 
+           type="range" min="0" max="100" step="1"
+           value="%.cct%" 
+           oninput="previewCct%.object_id%(this.value)"
+           onmouseup="sendNewCct%.object_id%()"
+           ontouchend="sendNewCct%.object_id%()">
+	</div>
+  <div class="select-wrapper">
+	<h5>🎭 Сцены</h5>
+	<select id="guverLamp%.object_id%_sceneSelect" onchange="sendScene%.object_id%(this.value)">
+		<!-- Опции будут сгенерированы динамически -->
+	</select>
+  </div>
 </div>
 
+<script>
+	// Инициализация фона ползунков при загрузке
+	updateSliderFill('#guverLamp%.object_id%_colorLevel', %.colorLevel%, '%.color%');
+	updateSliderFill('#guverLamp%.object_id%_level', %.level%, '#4CAF50');
+	updateSliderFill('#guverLamp%.object_id%_cct', %.cct%, '#f7a800');
+	populateSceneSelect%.object_id%();
+</script>
