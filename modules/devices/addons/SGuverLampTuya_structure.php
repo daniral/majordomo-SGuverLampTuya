@@ -64,7 +64,7 @@ if (SETTINGS_SITE_LANGUAGE && file_exists(ROOT . 'languages/SGuverLampTuya_' . S
 }
 
 $this->device_types['GuverLampTuya'] = array(
-	'TITLE' => 'Лампа Гайвера(Tuya)',
+	'TITLE' => 'Освещение (Лампа Гайвера Tuya)',
 	'PARENT_CLASS' => 'SControllers',
 	'CLASS' => 'SGuverLampTuya',
 	'DESCRIPTION'=>'Лампа Гайвера(Tuya)',
