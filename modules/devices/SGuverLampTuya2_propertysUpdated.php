@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Обновление свойств устройства SGuverLampTuya (Лампа Гайвера Tuya).
+ * Обновление свойств устройства SGuverLampTuya2 (Лампа Гайвера Tuya).
  *
  * Этот метод обрабатывает изменения свойств устройства, включая:
  * - Белый свет (level, cct)
@@ -128,4 +128,57 @@ if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 	if(!$foundName){
 		$this->setProperty('sceneName', $sceneNameSaved);
 	}
+}elseif(in_array($property, ['scenesList'])){
+	$objectName = $this->object_title;
+
+	// Какие свойства синхронизируем с таблицей commands
+	$props = ['sceneName', 'dayScene', 'nightScene'];
+
+	foreach ($props as $propName) {
+
+		// 1. Ищем команду для данного свойства
+		$rec = SQLSelectOne("
+			SELECT *
+			FROM commands
+			WHERE LINKED_OBJECT='" . DBSafe($objectName) . "'
+			AND LINKED_PROPERTY='" . DBSafe($propName) . "'
+			LIMIT 1
+		");
+
+		if (!$rec) {
+			//DebMes("Команда {$propName} не найдена для объекта {$objectName}");
+			continue;
+		}
+
+		// 2. Список сцен из commands.DATA
+		$commandsScenes = [];
+		if (!empty($rec['DATA'])) {
+			$sceneItems = preg_split('/\r\n|\n|\r/', trim($rec['DATA']));
+			foreach ($sceneItems as $item) {
+				$parts = explode('=', $item, 2);
+				$commandsScenes[] = trim($parts[0]);
+			}
+		}
+
+		// 3. Список сцен из объекта (один общий scenesList)
+		$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
+		$sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
+
+		$objectScenes = [];
+		foreach ($sceneItems as $item) {
+			$parts = preg_split('/\s*=\s*/', $item, 2);
+			if (!empty($parts[0])) $objectScenes[] = $parts[0];
+		}
+
+		// 4. Сравнение и обновление
+		if ($commandsScenes !== $objectScenes) {
+			$rec['DATA'] = implode("\r\n", $objectScenes);
+			SQLUpdate('commands', $rec);
+			//DebMes("Обновлены {$propName} для {$objectName}");
+		} else {
+			//DebMes("{$propName} уже актуально, изменений нет");
+		}
+	}
+
+	return;
 }

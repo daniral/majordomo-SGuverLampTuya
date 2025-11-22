@@ -1,10 +1,10 @@
 <?php
 /**
- * Обработчик голосовых команд для устройств типа SRGBStripTuya.
+ * Обработчик голосовых команд для устройств типа SGuverLampTuya2.
  *
  * Данный блок кода анализирует текст команды пользователя ($command)
  * и формирует управляющие действия ($run_code) для умной RGB-ленты
- * SRGBStripTuya в MajorDoMo.
+ * SGuverLampTuya2 в MajorDoMo.
  *
  * Поддерживаются следующие группы команд:
  *
@@ -24,7 +24,7 @@
  * ----------------------------------------------------------------------
  * 2. Управление ЯРКОСТЬЮ (белого света)
  * ----------------------------------------------------------------------
- *  Ключевые шаблоны: LANG_SRGBStripTuya_PATTERN_BRIGHTNESS
+ *  Ключевые шаблоны: LANG_SGuverLampTuya2_PATTERN_BRIGHTNESS
  *
  *  Поддерживаемые варианты команд:
  *
@@ -46,7 +46,7 @@
  * ----------------------------------------------------------------------
  * 3. Управление ЦВЕТОМ
  * ----------------------------------------------------------------------
- *  Словарь: LANG_SRGBStripTuya_PATTERN_COLOR
+ *  Словарь: LANG_SGuverLampTuya2_PATTERN_COLOR
  *
  *  Поддерживаемые цвета:
  *      красный, зелёный, синий, белый, жёлтый,
@@ -64,7 +64,7 @@
  * ----------------------------------------------------------------------
  * 4. Управление ЯРКОСТЬЮ ЦВЕТНОГО СВЕТА (colorLevel)
  * ----------------------------------------------------------------------
- *  Словарь: LANG_SGuverLampTuya_PATTERN_COLOR_BRIGHTNESS
+ *  Словарь: LANG_SGuverLampTuya2_PATTERN_COLOR_BRIGHTNESS
  *
  *  Поддержка:
  *      - установка числового значения: "цвет на 50"
@@ -79,7 +79,7 @@
  * ----------------------------------------------------------------------
  * 5. Управление СЦЕНАМИ
  * ----------------------------------------------------------------------
- *  Шаблон: LANG_SRGBStripTuya_PATTERN_SCENE
+ *  Шаблон: LANG_SGuverLampTuya2_PATTERN_SCENE
  *
  *  Список сцен берётся из свойства:
  *      $linked_object.scenesList
@@ -106,7 +106,7 @@
  *
  * Ожидаемые внешние входные параметры:
  *
- * @param string $device_type    Тип устройства (должен быть 'SRGBStripTuya')
+ * @param string $device_type    Тип устройства (должен быть 'SGuverLampTuya2')
  * @param string $command        Исходная голосовая команда пользователя
  * @param string $linked_object  Имя объекта MajorDoMo
  * @param string $device_title   Человекочитаемое имя устройства
@@ -128,7 +128,7 @@
  */
 
 
-if ($device_type == 'SRGBStripTuya') {
+if ($device_type == 'SGuverLampTuya2') {
 
     // --- ВКЛ / ВЫКЛ / ПЕРЕКЛЮЧИТЬ ---
     if (preg_match('/' . LANG_DEVICES_PATTERN_TURNON . '/uis', $command)) {
@@ -151,7 +151,7 @@ if ($device_type == 'SRGBStripTuya') {
     }
 
     // --- ЯРКОСТЬ ---
-    elseif (preg_match('/' . LANG_SRGBStripTuya_PATTERN_BRIGHTNESS . '/uis', $command)) {
+    elseif (preg_match('/' . LANG_SGuverLampTuya2_PATTERN_BRIGHTNESS . '/uis', $command)) {
         $currentLevel = (int)getGlobal("$linked_object.level");
         $step = 10;
         if (preg_match('/(?:\s)(\d{1,2}|100)(?:%|\s|$)/uis', $command, $matches)) {
@@ -172,7 +172,7 @@ if ($device_type == 'SRGBStripTuya') {
     }
 
     // --- ЦВЕТ ---
-    elseif (preg_match('/' . LANG_SRGBStripTuya_PATTERN_COLOR . '/uis', $command)) {
+    elseif (preg_match('/' . LANG_SGuverLampTuya2_PATTERN_COLOR . '/uis', $command)) {
         $colors = array(
             'красн' => 'red', 'зел' => 'green', 'син' => 'blue',
             'бел' => 'white', 'ж[её]лт' => 'yellow',
@@ -195,7 +195,7 @@ if ($device_type == 'SRGBStripTuya') {
         }
     }
     // --- ЯРКОСТЬ ЦВЕТНОГО СВЕТА (colorLevel) ---
-    elseif (preg_match('/' . LANG_SGuverLampTuya_PATTERN_COLOR_BRIGHTNESS . '/uis', $command)) {
+    elseif (preg_match('/' . LANG_SGuverLampTuya2_PATTERN_COLOR_BRIGHTNESS . '/uis', $command)) {
 
         $currentLevel = (int)getGlobal("$linked_object.colorLevel");
         $step = 10;
@@ -222,7 +222,7 @@ if ($device_type == 'SRGBStripTuya') {
     }
 
     // --- СЦЕНЫ ---
-    elseif (preg_match('/' . LANG_SRGBStripTuya_PATTERN_SCENE . '/uis', $command)) {
+    elseif (preg_match('/' . LANG_SGuverLampTuya2_PATTERN_SCENE . '/uis', $command)) {
         $scenesRaw = getGlobal("$linked_object.scenesList");
         if ($scenesRaw) {
             // Разделяем сцены по запятой или переводу строки, сохраняем пробелы внутри имен

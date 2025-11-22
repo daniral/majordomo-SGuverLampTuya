@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 /**
  * ============================================================
- * Dictionary for SGuverLampTuya control (English)
+ * Dictionary for SGuverLampTuya2 control (English)
  * ============================================================
  *
  * This file defines $dictionary array for recognizing text or voice commands
- * for controlling SGuverLampTuya devices:
+ * for controlling SGuverLampTuya2 devices:
  *
  *   - Brightness control (white light)
  *   - Color temperature control
@@ -20,17 +20,17 @@ declare(strict_types=1);
  * Values are strings with keywords separated by | (OR) used for matching.
  *
  * For each key, a constant LANG_<KEY> is automatically defined, e.g.:
- *   LANG_SGuverLampTuya_PATTERN_BRIGHTNESS
+ *   LANG_SGuverLampTuya2_PATTERN_BRIGHTNESS
  *
  * These constants are used in command parsing logic to match user input.
  *
  * ------------------------------------------------------------------------
  * @phpstan-type PatternKey
- *     'SGuverLampTuya_PATTERN_BRIGHTNESS' |
- *     'SGuverLampTuya_PATTERN_TEMPERATURE' |
- *     'SGuverLampTuya_PATTERN_COLOR' |
- *     'SGuverLampTuya_PATTERN_COLOR_BRIGHTNESS' |
- *     'SGuverLampTuya_PATTERN_SCENE'
+ *     'SGuverLampTuya2_PATTERN_BRIGHTNESS' |
+ *     'SGuverLampTuya2_PATTERN_TEMPERATURE' |
+ *     'SGuverLampTuya2_PATTERN_COLOR' |
+ *     'SGuverLampTuya2_PATTERN_COLOR_BRIGHTNESS' |
+ *     'SGuverLampTuya2_PATTERN_SCENE'
  *
  * @phpstan-type PatternDictionary array<PatternKey, non-empty-string>
  *
@@ -44,7 +44,7 @@ $dictionary = [
      * Examples: "bright", "brightness", "increase light", "decrease light"
      * @var non-empty-string
      */
-    'SGuverLampTuya_PATTERN_BRIGHTNESS' =>
+    'SGuverLampTuya2_PATTERN_BRIGHTNESS' =>
         'bright|brightness|lighter|dimmer|light level|level|increase light|decrease light',
 
     /**
@@ -52,7 +52,7 @@ $dictionary = [
      * Examples: "temperature", "warm", "cool", "cold", "neutral", "tone", "white", "yellow", "blue"
      * @var non-empty-string
      */
-    'SGuverLampTuya_PATTERN_TEMPERATURE' =>
+    'SGuverLampTuya2_PATTERN_TEMPERATURE' =>
         'temperature|color|warm|cool|cold|neutral|tone|white|yellow|blue',
 
     /**
@@ -60,7 +60,7 @@ $dictionary = [
      * Examples: "red", "green", "blue", "white", "yellow", "cyan", "magenta", "orange", "purple", "pink", "lime"
      * @var non-empty-string
      */
-    'SGuverLampTuya_PATTERN_COLOR' =>
+    'SGuverLampTuya2_PATTERN_COLOR' =>
         'red|green|blue|white|yellow|cyan|magenta|orange|purple|pink|lime',
 
     /**
@@ -68,7 +68,7 @@ $dictionary = [
      * Examples: "color brighter", "increase color brightness", "dim color", "decrease color"
      * @var non-empty-string
      */
-    'SGuverLampTuya_PATTERN_COLOR_BRIGHTNESS' =>
+    'SGuverLampTuya2_PATTERN_COLOR_BRIGHTNESS' =>
         'color brighter|increase color|increase rgb|brighter color|dim color|decrease color|decrease rgb',
 
     /**
@@ -76,7 +76,7 @@ $dictionary = [
      * Examples: "scene", "mode", "setting"
      * @var non-empty-string
      */
-    'SGuverLampTuya_PATTERN_SCENE' =>
+    'SGuverLampTuya2_PATTERN_SCENE' =>
         'scene|mode|setting|'
 ];
 

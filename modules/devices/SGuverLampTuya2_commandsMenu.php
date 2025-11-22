@@ -16,18 +16,51 @@
  *
  * @param string $objectName Название объекта (используется для идентификации в меню).
  * @param array $menuItems Массив элементов меню в формате MajorDoMo.
- *
+ *  Формат пункта массива $menuItems= [[$objectName, '', '', '', '', '', '', '', '', '', '', '', [],'']];
+ * 
+ * 	[
+ * 		 0 => 'TITLE',          // Название команды
+ * 		 1 => 'LINKED_OBJECT',  // Связанный объект (если пусто, используется $objectName)
+ * 		 2 => 'LINKED_PROPERTY',// Свойство объекта
+ * 		 3 => 'TYPE',           // Тип команды
+ * 		 4 => 'CUR_VALUE',      // Текущее значение
+ * 		 5 => 'MIN_VALUE',      // Минимальное значение
+ * 		 6 => 'MAX_VALUE',      // Максимальное значение
+ * 		 7 => 'STEP_VALUE',     // Шаг изменения
+ *  	 8 => 'READ_ONLY',      // Только чтение (0 или 1)
+ *  	 9 => 'CODE',           // Произвольный код
+ *  	 10 => 'DATA',          // Дополнительные данные
+ * 		 11 => 'PRIORITY',      // Приоритет команды
+ *  	 12 => [ подменю ],     // Массив подменю (необязательный)
+ *  	 13 => 'ICON',          // Иконка
+ * 	]
  * @return void
  */
-
 $objectName = $this->object_title;
+
+// Получаем список сцен и очищаем его от лишних символов
+$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
+// Разбиваем строки (запятая или перенос строки)
+$sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
+$sceneNamesExport = '';
+foreach ($sceneItems as $item) {
+    // Разбиваем "Имя = значение"
+    $parts = preg_split('/\s*=\s*/', $item, 2);
+    if (count($parts) === 2) {
+        $name = $parts[0];
+        $sceneNamesExport .= $name . "\r\n";
+    }
+}
 
 $menuItems = [
     // Главное меню
     [$objectName, '', '', '', '', '', '', '', '', '', '', 10, [
-        ['Вкл/Выкл', $objectName, 'status', 'switch', '1', '', '', '', '', '', '', 80],
-        ['Яркость', $objectName, 'level', 'sliderbox', '50', 0, 100, 1, '', "callMethod('{$objectName}.setLevel', array('value' => \$new_value));", '', 70],
-        ['Температура', $objectName, 'cct', 'sliderbox', '0', 0, 100, 1, '', "callMethod('{$objectName}.setCct', array('value' => \$new_value));", '', 60],
+        ['Вкл/Выкл', $objectName, 'status', 'switch', '1', '', '', '', '', '', '', 100],
+        ['Цвет', $objectName, 'color', 'color', '', '', '', '', '', "callMethod('{$objectName}.setColor', array('value' => \$new_value));", '', 100],
+        ['Яркость цвета', $objectName, 'colorLevel', 'sliderbox', '50', 1, 100, 1, '', "callMethod('{$objectName}.setColorLevel', array('value' => \$new_value));", '', 90],
+        ['Яркость белого', $objectName, 'level', 'sliderbox', '50', 1, 100, 1, '', "callMethod('{$objectName}.setLevel', array('value' => \$new_value));", '', 80],
+        ['Температура белого', $objectName, 'cct', 'sliderbox', '0', 1, 100, 1, '', "callMethod('{$objectName}.setCct', array('value' => \$new_value));", '', 70],
+		['Сцена', $objectName, 'sceneName', 'selectbox', '2', '', '', '', '', '', $sceneNamesExport, 60],
 
         // Автовключение
         ['Автовключение', '', '', '', '', '', '', '', '', '', '', 50, [
@@ -58,20 +91,24 @@ $menuItems = [
 
         // Цвет
         ['Цвет', '', '', '', '', '', '', '', '', '', '', 10, [
-            ['Яркость', '', '', '', '', '', '', '', '', '', '', 20, [
-                ['Днем', $objectName, 'dayLevel', 'sliderbox', '100', 0, 100, 1, '', '', '', 40],
-                ['Ночью', $objectName, 'nightLevel', 'sliderbox', '10', 0, 100, 1, '', '', '', 30],
-                ['Максимальная', $objectName, 'levelMaxWork', 'sliderbox', '254', 0, 1000, 1, '', '', '', 20],
-                ['Минимальная', $objectName, 'levelMinWork', 'sliderbox', '0', 0, 1000, 1, '', '', '', 10],
+            ['Днем', '', '', '', '', '', '', '', '', '', '', 20, [
+                ['Цвет', $objectName, 'dayColor', 'color', '#FFFFFF', '', '', '', '', '', '', 60],
+                ['Яркость цвета', $objectName, 'dayColorLevel', 'sliderbox', '100', 1, 100, 1, '', '', '', 50],
+                ['Яркость белого', $objectName, 'dayLevel', 'sliderbox', '100', 1, 100, 1, '', '', '', 40],
+                ['Теплота белого', $objectName, 'dayCct', 'sliderbox', '100', 1, 100, 1, '', '', '', 30],
+        		['Сцена', $objectName, 'dayScene', 'selectbox', '', '', '', '', '', '', $sceneNamesExport, 20],
+        		['Режим', $objectName, 'dayMode', 'selectbox', '2', '', '', '', '', '', "1=Цвет\r\n2=Белый\r\n3=Сцена", 10],
             ]],
-            ['Температура', '', '', '', '', '', '', '', '', '', '', 10, [
-                ['Днем', $objectName, 'dayCct', 'sliderbox', '0', 0, 100, 1, '', '', '', 40],
-                ['Ночью', $objectName, 'nightCct', 'sliderbox', '100', 0, 100, 1, '', '', '', 30],
-                ['Максимальная', $objectName, 'cctMaxWork', 'sliderbox', '370', 1, 1000, 1, '', '', '', 20],
-                ['Минимальная', $objectName, 'cctMinWork', 'sliderbox', '153', 1, 1000, 1, '', '', '', 10],
-            ]],
+            ['Ночью', '', '', '', '', '', '', '', '', '', '', 10, [
+                ['Цвет', $objectName, 'nightColor', 'color', '#FFFF00', '', '', '', '', '', '', 60],
+                ['Яркость цвета', $objectName, 'nightColorLevel', 'sliderbox', '30', 1, 100, 1, '', '', '', 50],
+                ['Яркость белого', $objectName, 'nightLevel', 'sliderbox', '30', 1, 100, 1, '', '', '', 40],
+                ['Теплота белого', $objectName, 'nightCct', 'sliderbox', '0', 1, 100, 1, '', '', '', 30],
+        		['Сцена', $objectName, 'nightScene', 'selectbox', '2', '', '', '', '', '', $sceneNamesExport, 20],
+            	['Режим', $objectName, 'nightMode', 'selectbox', '2', '', '', '', '', '', "1=Цвет\r\n2=Белый\r\n3=Сцена", 10],
         ]],
-    ],'SGuverLampTuya.png']
+        ]],
+    ],'SGuverLampTuya2.png']
 ];
 
 createObjectMenu($objectName, $menuItems);

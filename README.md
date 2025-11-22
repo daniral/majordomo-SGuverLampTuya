@@ -2,7 +2,7 @@
 ### Простое устройство для MajorDoMo
 
 Модуль добавляет поддержку умной лампы **Guver Lamp от Tuya** в MajorDoMo.  
-Расширяет встроенный класс `SControllers`, добавляя новый класс **`SGuverLampTuya`**.
+Расширяет встроенный класс `SControllers`, добавляя новый класс **`SGuverLampTuya2`**.
 
 ---
 
