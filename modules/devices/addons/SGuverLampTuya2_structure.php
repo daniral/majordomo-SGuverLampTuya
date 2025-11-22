@@ -125,7 +125,7 @@ $this->device_types['GuverLampTuya2'] = array(
 		'colorSaved' => array('DESCRIPTION' => 'Последний цвет.'),
 		'work_mode' => array('DESCRIPTION' => 'Режим работы.'),
 		'workScene' => array('DESCRIPTION' => 'Рабочая сцена.', 'ONCHANGE' => 'worksUpdated'),
-		'scenesList' => array('DESCRIPTION' => 'Список сцен.'),
+		'scenesList' => array('DESCRIPTION' => 'Список сцен.', 'ONCHANGE' => 'propertysUpdated'),
 		'sceneName' => array('DESCRIPTION' => 'Название текущей сцены.', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'sceneNameSaved' => array('DESCRIPTION' => 'Последняя сцена.'),
 

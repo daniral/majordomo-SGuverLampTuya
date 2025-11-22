@@ -130,13 +130,45 @@ if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 	}
 }elseif(in_array($property, ['scenesList'])){
 	$objectName = $this->object_title;
-
-	// Какие свойства синхронизируем с таблицей commands
+	// ---------------------------------------------
+	// 1. Очистка и валидирование scenesList
+	// ---------------------------------------------
+	$rawScenesList = $this->getProperty('scenesList');
+	// Удаляем переносы строк — безопасно
+	$rawScenesListNormalized = str_replace(["\r", "\n"], '', $rawScenesList);
+	// Разбиваем ТОЛЬКО по запятым
+	$sceneItems = explode(',', $rawScenesListNormalized);
+	$cleanItems = [];
+	foreach ($sceneItems as $item) {
+		// trim только по краям
+		$item = trim($item);
+		if ($item === '') continue; // пустой элемент - невалиден
+		// Должен быть знак '='
+		if (strpos($item, '=') === false) continue;
+		// Разделяем имя и значение
+		[$name, $val] = explode('=', $item, 2);
+		// Тоже trim только по краям
+		$name = trim($name);
+		$val  = trim($val);
+		// Проверяем валидность
+		if ($name === '' || $val === '') continue;
+		// Имя и значение оставляем как есть (внутренние пробелы и табы не трогаем)
+		$cleanItems[] = $name . '=' . $val;
+	}
+	// Собираем строку обратно
+	$cleanScenesList = implode(',', $cleanItems);
+	// Если строка изменилась — записываем и выходим,
+	// метод запустится снова автоматически
+	if ($cleanScenesList !== $rawScenesList) {
+		$this->setProperty('scenesList', $cleanScenesList);
+		return;
+	}
+	// ---------------------------------------------
+	// 2. Синхронизация с таблицей commands
+	// ---------------------------------------------
 	$props = ['sceneName', 'dayScene', 'nightScene'];
-
 	foreach ($props as $propName) {
-
-		// 1. Ищем команду для данного свойства
+		// Ищем команду
 		$rec = SQLSelectOne("
 			SELECT *
 			FROM commands
@@ -144,13 +176,8 @@ if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 			AND LINKED_PROPERTY='" . DBSafe($propName) . "'
 			LIMIT 1
 		");
-
-		if (!$rec) {
-			//DebMes("Команда {$propName} не найдена для объекта {$objectName}");
-			continue;
-		}
-
-		// 2. Список сцен из commands.DATA
+		if (!$rec) continue;
+		// Список сцен из commands.DATA
 		$commandsScenes = [];
 		if (!empty($rec['DATA'])) {
 			$sceneItems = preg_split('/\r\n|\n|\r/', trim($rec['DATA']));
@@ -159,26 +186,21 @@ if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 				$commandsScenes[] = trim($parts[0]);
 			}
 		}
-
-		// 3. Список сцен из объекта (один общий scenesList)
-		$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
-		$sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
-
+		// Список сцен из объекта
+		$scenesList = $cleanScenesList; // уже очищенный вариант
+		$sceneItems = explode(',', $scenesList);
 		$objectScenes = [];
 		foreach ($sceneItems as $item) {
-			$parts = preg_split('/\s*=\s*/', $item, 2);
-			if (!empty($parts[0])) $objectScenes[] = $parts[0];
+			$parts = explode('=', $item, 2);
+			if (!empty($parts[0])) {
+				$objectScenes[] = trim($parts[0]);
+			}
 		}
-
-		// 4. Сравнение и обновление
+		// Обновляем commands.DATA если отличается
 		if ($commandsScenes !== $objectScenes) {
 			$rec['DATA'] = implode("\r\n", $objectScenes);
 			SQLUpdate('commands', $rec);
-			//DebMes("Обновлены {$propName} для {$objectName}");
-		} else {
-			//DebMes("{$propName} уже актуально, изменений нет");
 		}
 	}
-
 	return;
 }
