@@ -113,14 +113,12 @@ if (!function_exists('initDefaults')) {
 	}
 }
 
-/**
- * Получает актуальные значения яркости, CCT, цвета и сцены для авто-режима лампы.
- *
- * @param object     $object      Объект лампы (MajorDoMo object)
- * @param int|null   $level       Принудительное значение яркости (если указано)
- * @param int|null   $cct         Принудительное значение CCT (если указано)
+/** Получает актуальные значения яркости, CCT, цвета и сцены для авто-режима лампы.
+ * @param object      $object      Объект лампы (MajorDoMo object)
+ * @param int|null    $level       Принудительное значение яркости (если указано)
+ * @param int|null    $cct         Принудительное значение CCT (если указано)
  * @param string|null $color      Принудительное значение цвета (hex или raw Tuya)
- * @param int|null   $colorLevel  Принудительный уровень яркости цветного света
+ * @param int|null    $colorLevel  Принудительный уровень яркости цветного света
  * @param string|null $sceneName  Принудительное имя сцены
  *
  * @return array{
@@ -236,8 +234,8 @@ if (!function_exists('adjustProperty')) {
  *
  * @return int Возвращает последний использованный ID после вставки всех команд.
  */
-if (!function_exists('createObjectMenu')) {
-	function createObjectMenu($objectName, $menuItems, $parentId = 0, $insertID = 0, $depth = 0){
+if (!function_exists('createCommandsMenu')) {
+	function createCommandsMenu($objectName, $menuItems, $parentId = 0, $insertID = 0, $depth = 0){
 		// при первом вызове получаем максимальный ID из таблицы
 		if ($depth === 0 && $insertID === 0) {
 			$data = SQLSelectOne("SELECT MAX(ID) AS MAX_ID FROM commands");
@@ -284,6 +282,21 @@ if (!function_exists('createObjectMenu')) {
 		}
 
 		return $insertID;
+	}
+}
+
+/** Удаляет меню из таблицы `commands`, привязанные к пересланному имени объекта.
+ *   deleteObjectMenu($objectName);
+ *   @param string $objectName Имя объекта, к которому привязываются команды.
+ */
+if (!function_exists('deleteCommandsMenu')) {
+	function deleteCommandsMenu($objectName) {
+		$objectName = DBSafe($objectName);
+		$commands = SQLSelect("SELECT ID FROM commands WHERE LINKED_OBJECT='{$objectName}'");
+		
+		foreach ($commands as $cmd) {
+			SQLExec("DELETE FROM commands WHERE ID=" . (int)$cmd['ID']);
+		}
 	}
 }
 

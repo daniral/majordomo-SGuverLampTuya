@@ -182,6 +182,7 @@ $this->device_types['GuverLampTuya2'] = array(
 		'propertysUpdated' => array('DESCRIPTION' => 'Запускается при смене параметров'),
 	
 		'byDefault' => array('DESCRIPTION' => 'Установить свойства по умолчанию.'),
-		'commandsMenu' => array('DESCRIPTION' => 'Создает меню управления.', '_CONFIG_SHOW' => 1),
-),
+		'createCommandsMenu' => array('DESCRIPTION' => 'Создает меню управления.', '_CONFIG_SHOW' => 1),
+		'deleteCommandsMenu' => array('DESCRIPTION' => 'Удаляет меню управления.', '_CONFIG_SHOW' => 1),	
+	),	
 );

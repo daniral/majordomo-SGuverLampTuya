@@ -112,4 +112,4 @@ $menuItems = [
     ],'SGuverLampTuya2.png']
 ];
 
-createObjectMenu($objectName, $menuItems);
+createCommandsMenu($objectName, $menuItems);
