@@ -6,7 +6,7 @@
  *  - яркостью белого света (level, levelWork, levelSaved),
  *  - температурой белого (cct, cctWork, cctSaved),
  *  - цветным RGB-светом (color, colorLevel, colorWork, colorSaved),
- *  - сценами (sceneName, workScene),
+ *  - сценами (sceneName, sceneWork),
  *  - автоматическими режимами освещения (по времени, солнцу, датчикам),
  *  - а также вспомогательные параметры и триггеры MajorDoMo.
  *
@@ -29,8 +29,8 @@
  * @property string $colorWork        Рабочий цвет HSV
  * @property string $colorSaved       Последний цвет
  *
- * @property string $work_mode        Режим работы лампы
- * @property string $workScene        Рабочая сцена
+ * @property string $modeWork        Режим работы лампы
+ * @property string $sceneWork        Рабочая сцена
  * @property string $scenesList       Список сцен
  *
  * @property string $sceneName        Название выбранной сцены
@@ -113,21 +113,23 @@ $this->device_types['GuverLampTuya2'] = array(
 	'CLASS' => 'SGuverLampTuya2',
 	'DESCRIPTION'=>'Лампа Гайвера(Tuya)2',
 	'PROPERTIES' => array(
-		'level' => array('DESCRIPTION' => 'Уровень яркости белого(0<-->100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
-		'levelWork' => array('DESCRIPTION' => 'Рабочая яркость белого (0<-->1000).', 'ONCHANGE' => 'worksUpdated'),
+		'level' => array('DESCRIPTION' => 'Уровень яркости белого(1<-->100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
+		'levelWork' => array('DESCRIPTION' => 'Рабочая яркость белого (1<-->1000).', 'ONCHANGE' => 'worksUpdated'),
 		'levelSaved' => array('DESCRIPTION' => 'Последняя яркость белого.'),
-		'cct' => array('DESCRIPTION' => 'Уровень температуры белого (0-100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
-		'cctWork' => array('DESCRIPTION' => 'Рабочая температура белого (0<-->1000).', 'ONCHANGE' => 'worksUpdated'),
+		'cct' => array('DESCRIPTION' => 'Уровень температуры белого (1-100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
+		'cctWork' => array('DESCRIPTION' => 'Рабочая температура белого (1<-->1000).', 'ONCHANGE' => 'worksUpdated'),
 		'cctSaved' => array('DESCRIPTION' => 'Последняя температура белого.'),
 		'color' => array('DESCRIPTION' => 'Цвет (RGB).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
-		'colorLevel' => array('DESCRIPTION' => 'Яркость цветного света (0<-->100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'colorWork' => array('DESCRIPTION' => 'Рабочий цвет (HSV).', 'ONCHANGE' => 'worksUpdated'),
 		'colorSaved' => array('DESCRIPTION' => 'Последний цвет.'),
-		'work_mode' => array('DESCRIPTION' => 'Режим работы.'),
-		'workScene' => array('DESCRIPTION' => 'Рабочая сцена.', 'ONCHANGE' => 'worksUpdated'),
+		'colorLevel' => array('DESCRIPTION' => 'Яркость цветного света (1<-->100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
+		'colorLevelSaved' => array('DESCRIPTION' => 'Последняя Яркость цветного света.', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
+		'modeWork' => array('DESCRIPTION' => 'Режим работы.'),
+		'sceneWork' => array('DESCRIPTION' => 'Рабочая сцена.', 'ONCHANGE' => 'worksUpdated'),
 		'scenesList' => array('DESCRIPTION' => 'Список сцен.', 'ONCHANGE' => 'propertysUpdated'),
 		'sceneName' => array('DESCRIPTION' => 'Название текущей сцены.', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'sceneNameSaved' => array('DESCRIPTION' => 'Последняя сцена.'),
+		'mode' => array('DESCRIPTION' => 'Что включать (цвет, белый, сцена)','_CONFIG_TYPE'=>'select','_CONFIG_OPTIONS'=>'1=Цвет,2=Белый,3=Сцена'),
 
 		'dayColor' => array('DESCRIPTION' => 'Цвет днем', '_CONFIG_TYPE' => 'num',),
 		'dayColorLevel' => array('DESCRIPTION' => 'Уровень яркости цвета днем', '_CONFIG_TYPE' => 'num',),

@@ -9,28 +9,18 @@
  *   - 'warm'
  *   - 'warmest'
  *
- *  callMethod('имя объекта.setCct', array("value"=>0--100));
+ *  callMethod('имя объекта.setCct', array("value"=>1--100));
  *  callMethod('имя объекта.setCct', array("value"=>'coolest'));
  * 
- * @param array{
- *     value: int|string|null   // Цветовая температура 0–100% или строковый пресет
- * } $params Ассоциативный массив параметров.
+ * @param array $params Ассоциативный массив параметров,
+ *                      содержащий ключи:
+ *                      - 'cct' (string) — число или пресет;
+ *                      - 'value' (string) — альтернативное имя параметра.
  *
  * @return void
  */
 
-if (!isset($params['value'])) return;
-$value = $params['value'];
+$cct = $params['cct'] ?? $params['value'] ?? null;
+if ($cct === null) return;
 
-$presets = [
-			'coolest' => 100,
-			'cool'    => 66,
-			'warm'    => 33,
-			'warmest' => 0,
-		];
-
-if (isset($presets[$value])) {
-	$value = $presets[$value];
-}
-		
-$this->setProperty('cct', $value ?? null, 'setLevelCct');
+$this->setProperty('cct', $cct, 'setLevelCct');

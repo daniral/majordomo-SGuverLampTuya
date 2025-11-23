@@ -62,8 +62,8 @@
 
 
 $defaults = [
-    'color' => '#ffff00', 'colorLevel' => '50',
-	'level' => '50', 'cct' => '50',
+    'color' => '#ffff00', 'colorLevel' => '100',
+	'level' => '100', 'cct' => '100',
     'scenesList' => 
        'Спокойная=000e0d0000000000000000c80000,
         Чтение=010e0d0000000000000003e801f4,
@@ -98,12 +98,17 @@ $defaults = [
         Пасха=275a5a020014006403e800000000464602000003e803e800000000323202015e01f403e800000000464602011303e803e800000000,
         Хэллоуин=28464601011303e803e800000000464601001e03e803e800000000',
     'sceneName' => 'Спокойная',
+    'mode' => '2',
 
+    'dayColor' => '#FFFFFF', 'dayColorLevel' => '100',
     'dayLevel' => '100', 'dayCct' => '0', 
-    'dayColor' => '#FFFFFF', 'dayScene' => 'Восход',
+    'dayScene' => 'Восход', 
+    'dayMode' => '2',
 
+    'nightColor' => '#FFFF00', 'nightColorLevel' => '30',
     'nightLevel' => '30', 'nightCct' => '100', 
-    'nightColor' => '#FFFF00', 'nightScene' => 'Закат',
+    'nightScene' => 'Закат', 
+    'nightMode' => '2',
 
     'timerOff' => '45', 'autoOnOff' => '1',
     'presence' => '0', 'flag' => '0',

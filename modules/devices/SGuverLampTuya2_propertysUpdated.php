@@ -27,7 +27,7 @@
  *
  * Обработка сцен:
  *   - Список сцен хранится в свойстве scenesList в формате "Имя=Значение"
- *   - Рабочая сцена устанавливается в workScene
+ *   - Рабочая сцена устанавливается в sceneWork
  *   - При совпадении имени сцены с sceneName сохраняется состояние
  *
  * Особенности:
@@ -53,19 +53,20 @@
  * @see rgbToHSVhex() Преобразование RGB цвета в HSV hex
  * @see setProperty() Метод устройства для обновления свойства
  */
+//
 
-
-if ($this->getProperty('colorLevel') === '') $this->setProperty('colorLevel', '50');
-if ($this->getProperty('color') === '') $this->setProperty('color', '#ffff00');
-if ($this->getProperty('level') === '') $this->setProperty('level', '50');
-if ($this->getProperty('cct') === '') $this->setProperty('cct', '10');
+// --- Дефолтные свойства
+$this->callMethod('byDefault');
 
 $source = strtok($params['SOURCE'], " ") ?? null;
 $property = $params['PROPERTY'] ?? null;
 $status = $this->getProperty('status') ?? 0;
+$flag = $this->getProperty('flag') ?? 0;
 
 if($source === 'worksUpdated') return;
-
+if($source !== 'autoMode'){
+	if(!$flag) $this->setProperty('flag', 1);
+}
 $value = $params['NEW_VALUE'];
 $transform = array(
 	'red'      => '#ff0000',
@@ -78,7 +79,11 @@ $transform = array(
 	'orange'   => '#ffa500',
 	'purple'   => '#800080',
 	'pink'     => '#ffc0cb',
-	'lime'     => '#00ff00'
+	'lime'     => '#00ff00',
+	'coolest' => 100,
+	'cool'    => 66,
+	'warm'    => 33,
+	'warmest' => 1,
 	);
 if (isset($transform[$value])) $value = $transform[$value];
 
@@ -92,13 +97,14 @@ if(!is_null($value)) $this->setProperty($property , $value, 'worksUpdated');
 
 if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 	if($property == 'colorLevel')  $value = $colorSaved;
-	$this->setProperty('work_mode', 'colour');
+	$this->setProperty('modeWork', 'colour');
 	$hsvHex = rgbToHSVhex($value, $colorLevel)?: '003c03e801f4';
 	$this->setProperty('colorWork', $hsvHex, 'propertysUpdated');
 	if (!$status) $this->setProperty('status', 1);
 	$this->setProperty('colorSaved', $value);
+	$this->setProperty('colorLevelSaved', $colorLevel);
 }elseif(in_array($property, ['level', 'cct']) && is_numeric($value)){
-	$this->setProperty('work_mode', 'white');
+	$this->setProperty('modeWork', 'white');
 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
 	if (!$status) $this->setProperty('status', 1);
 	$this->setProperty($property . 'Saved', $value);
@@ -114,11 +120,11 @@ if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 		if (count($parts) == 2) {
 			$name  = $parts[0];
 			$scene = $parts[1];
-			// Если имя совпадает, обновляем workScene
+			// Если имя совпадает, обновляем sceneWork
 			if ($name === $sceneName) {
 				$foundName = true;
-				$this->setProperty('work_mode', 'scene');
-				$this->setProperty('workScene', $scene, 'propertysUpdated');
+				$this->setProperty('modeWork', 'scene');
+				$this->setProperty('sceneWork', $scene, 'propertysUpdated');
 				$this->setProperty('sceneNameSaved', $name);
 				if (!$status) $this->setProperty('status', 1);
 				break; // нашли нужную сцену, дальше не ищем
@@ -204,3 +210,4 @@ if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 	}
 	return;
 }
+

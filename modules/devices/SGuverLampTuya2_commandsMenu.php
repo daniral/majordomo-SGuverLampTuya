@@ -56,11 +56,12 @@ $menuItems = [
     // Главное меню
     [$objectName, '', '', '', '', '', '', '', '', '', '', 10, [
         ['Вкл/Выкл', $objectName, 'status', 'switch', '1', '', '', '', '', '', '', 100],
-        ['Цвет', $objectName, 'color', 'color', '', '', '', '', '', "callMethod('{$objectName}.setColor', array('value' => \$new_value));", '', 100],
-        ['Яркость цвета', $objectName, 'colorLevel', 'sliderbox', '50', 1, 100, 1, '', "callMethod('{$objectName}.setColorLevel', array('value' => \$new_value));", '', 90],
-        ['Яркость белого', $objectName, 'level', 'sliderbox', '50', 1, 100, 1, '', "callMethod('{$objectName}.setLevel', array('value' => \$new_value));", '', 80],
-        ['Температура белого', $objectName, 'cct', 'sliderbox', '0', 1, 100, 1, '', "callMethod('{$objectName}.setCct', array('value' => \$new_value));", '', 70],
-		['Сцена', $objectName, 'sceneName', 'selectbox', '2', '', '', '', '', '', $sceneNamesExport, 60],
+        ['Цвет', $objectName, 'color', 'color', '', '', '', '', '', "callMethod('{$objectName}.setColor', array('value' => \$new_value));", '', 110],
+        ['Яркость цвета', $objectName, 'colorLevel', 'sliderbox', '50', 1, 100, 1, '', "callMethod('{$objectName}.setColorLevel', array('value' => \$new_value));", '', 100],
+        ['Яркость белого', $objectName, 'level', 'sliderbox', '50', 1, 100, 1, '', "callMethod('{$objectName}.setLevel', array('value' => \$new_value));", '', 90],
+        ['Температура белого', $objectName, 'cct', 'sliderbox', '0', 1, 100, 1, '', "callMethod('{$objectName}.setCct', array('value' => \$new_value));", '', 80],
+		['Сцена', $objectName, 'sceneName', 'selectbox', '2', '', '', '', '', '', $sceneNamesExport, 70],
+        ['Режим', $objectName, 'mode', 'selectbox', '2', '', '', '', '', '', "1=Цвет\r\n2=Белый\r\n3=Сцена", 60],
 
         // Автовключение
         ['Автовключение', '', '', '', '', '', '', '', '', '', '', 50, [
@@ -103,7 +104,7 @@ $menuItems = [
                 ['Цвет', $objectName, 'nightColor', 'color', '#FFFF00', '', '', '', '', '', '', 60],
                 ['Яркость цвета', $objectName, 'nightColorLevel', 'sliderbox', '30', 1, 100, 1, '', '', '', 50],
                 ['Яркость белого', $objectName, 'nightLevel', 'sliderbox', '30', 1, 100, 1, '', '', '', 40],
-                ['Теплота белого', $objectName, 'nightCct', 'sliderbox', '0', 1, 100, 1, '', '', '', 30],
+                ['Теплота белого', $objectName, 'nightCct', 'sliderbox', '1', 1, 100, 1, '', '', '', 30],
         		['Сцена', $objectName, 'nightScene', 'selectbox', '2', '', '', '', '', '', $sceneNamesExport, 20],
             	['Режим', $objectName, 'nightMode', 'selectbox', '2', '', '', '', '', '', "1=Цвет\r\n2=Белый\r\n3=Сцена", 10],
         ]],
