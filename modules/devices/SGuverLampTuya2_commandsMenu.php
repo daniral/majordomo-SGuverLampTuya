@@ -55,7 +55,7 @@ foreach ($sceneItems as $item) {
 $menuItems = [
     // Главное меню
     [$objectName, '', '', '', '', '', '', '', '', '', '', 10, [
-        ['Вкл/Выкл', $objectName, 'status', 'switch', '1', '', '', '', '', '', '', 100],
+        ['Вкл/Выкл', $objectName, 'status', 'switch', '1', '', '', '', '', '', '', 120],
         ['Цвет', $objectName, 'color', 'color', '', '', '', '', '', "callMethod('{$objectName}.setColor', array('value' => \$new_value));", '', 110],
         ['Яркость цвета', $objectName, 'colorLevel', 'sliderbox', '50', 1, 100, 1, '', "callMethod('{$objectName}.setColorLevel', array('value' => \$new_value));", '', 100],
         ['Яркость белого', $objectName, 'level', 'sliderbox', '50', 1, 100, 1, '', "callMethod('{$objectName}.setLevel', array('value' => \$new_value));", '', 90],
