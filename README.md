@@ -31,7 +31,7 @@
   - sceneNameSaved   если не заполнено - Спокойная  
 
 С параметрами:  
-- callMethod('имя объекта.turnOn', array(
+- callMethod('имя объекта.turnOn', array(  
                                         'level'=> 1<-->100,   
                                         'cct'=> 1<-->100,  
                                         'color'=> 1<-->100,  
