@@ -66,15 +66,20 @@ if(in_array($property, ['colorWork']) && !is_null($value)){
 	$this->setProperty('color', $colorRGB, 'worksUpdated');
 	$this->setProperty('colorSaved', $colorRGB);
 	$this->setProperty('colorLevel', $colorLevel, 'worksUpdated');
+	$this->setProperty('colorLevelSaved', $colorLevel, 'worksUpdated');
 }elseif(in_array($property, ['levelWork', 'cctWork']) && !is_null($value)){
 	$value=round($value / 10);
+	$this->setProperty(str_replace('Work', '', $property), $value, 'worksUpdated');
+	$this->setProperty(str_replace('Work', '', $property).'Saved', $value);
+/*
 	if($property == 'levelWork'){
 		$this->setProperty('level', $value, 'worksUpdated');
-		$this->setProperty('levelWork', $value);
+		$this->setProperty('levelSaved', $value);
 	}elseif($property == 'cctWork'){
 		$this->setProperty('cct', $value, 'worksUpdated');
 		$this->setProperty('cctSaved', $value);
 	}
+*/
 }elseif(in_array($property, ['sceneWork']) && !is_null($params['NEW_VALUE'])){
 	$sceneWork = trim($params['NEW_VALUE'], " \t\n\r\0\x0B\"'");
 	$sceneNameToSet = 'unknown';
