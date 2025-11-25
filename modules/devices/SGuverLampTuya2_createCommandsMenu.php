@@ -37,6 +37,7 @@
  * @return void
  */
 $objectName = $this->object_title;
+$deleteMenu = $params['value'] ?? null;
 
 // Получаем список сцен и очищаем его от лишних символов
 $scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
@@ -112,4 +113,8 @@ $menuItems = [
     ],'SGuverLampTuya2.png']
 ];
 
-createCommandsMenu($objectName, $menuItems);
+if($deleteMenu === 'delete'){
+    deleteCommandsMenu($objectName, $menuItems);
+}else{
+    createCommandsMenu($objectName, $menuItems);
+}

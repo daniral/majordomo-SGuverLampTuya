@@ -27,4 +27,4 @@
 
 if (!isset($params['color']) && !isset($params['value'])) return;
 
-$this->setProperty('color', $params['color'] ?? $params['value'], 'setColor');
+$this->setProperty('color', $params['color'] ?? $params['value'], 'setLevelCct');

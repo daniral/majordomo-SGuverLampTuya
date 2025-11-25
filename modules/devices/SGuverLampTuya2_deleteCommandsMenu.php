@@ -1,7 +1,9 @@
 <?php
 
 /**
- * Удаляет меню управления для объекта лампы по имени объекта.
- */
+ * Удаляет команды меню по структуре $menuItems,
+ * используя TITLE и LINKED_OBJECT, включая вложенные
+ * команды по SUB_LIST (рекурсивно).
+*/
 
-deleteCommandsMenu($this->object_title);
+$this->callMethod('createCommandsMenu', array("value"=>'delete'));

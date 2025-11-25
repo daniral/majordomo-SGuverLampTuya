@@ -14,8 +14,10 @@
  * createCommandsMenu($objectName, $menuItems, $parentId, $insertID, $depth)
  * — Создает меню управления объектом рекурсивно.
  *
- * deleteCommandsMenu($objectName)
- * — Удаляет меню управления объектом.
+ * deleteCommandsMenu($objectName, $menuItems)
+ * — Удаляет команды меню по структуре $menuItems,
+ * — используя TITLE и LINKED_OBJECT, включая вложенные
+ * — команды по SUB_LIST (рекурсивно).
  * 
  * hsvToRgbHex($hsvHex) — Конвертирует 12-значный Tuya HSV в RGB HEX и яркость.
  * rgbToHSVhex($rgbHex, $brightness) — Конвертирует RGB HEX + яркость в Tuya HSV (12 hex цифр).
@@ -275,7 +277,7 @@ if (!function_exists('createCommandsMenu')) {
 			// если есть подменю — рекурсия
 			if (!empty($item[12]) && is_array($item[12])) {
 				$firstChildId = $insertID + 1;
-				$insertID = createObjectMenu($objectName, $item[12], $Record['ID'], $insertID, $depth + 1);
+				$insertID = createCommandsMenu($objectName, $item[12], $Record['ID'], $insertID, $depth + 1);
 				$lastChildId = $insertID;
 
 				// обновляем SUB_LIST у родителя
@@ -289,18 +291,67 @@ if (!function_exists('createCommandsMenu')) {
 	}
 }
 
-/** Удаляет меню из таблицы `commands`, привязанные к пересланному имени объекта.
- *   deleteObjectMenu($objectName);
- *   @param string $objectName Имя объекта, к которому привязываются команды.
+/** Удаляет команды меню по структуре $menuItems,
+ * используя TITLE и LINKED_OBJECT, включая вложенные
+ * команды по SUB_LIST (рекурсивно).
+ *
+ * Работает на PHP 7 без предупреждений и ошибок.
+ *
+ * @param string $objectName
+ * @param array  $menuItems
  */
 if (!function_exists('deleteCommandsMenu')) {
-	function deleteCommandsMenu($objectName) {
-		$objectName = DBSafe($objectName);
-		$commands = SQLSelect("SELECT ID FROM commands WHERE LINKED_OBJECT='{$objectName}'");
-		
-		foreach ($commands as $cmd) {
-			SQLExec("DELETE FROM commands WHERE ID=" . (int)$cmd['ID']);
+	function deleteCommandsMenu($objectName, $menuItems)
+	{
+		$conditions = [];
+		$stack = $menuItems;
+		// 1. Сбор условий TITLE + LINKED_OBJECT
+		while (!empty($stack)) {
+			$item = array_pop($stack);
+			$title = $item[0] ?? '';
+			$linkedObject = $item[1] ?: $objectName;
+			if ($title !== '') {
+				$conditions[] = sprintf(
+					"(TITLE='%s' AND LINKED_OBJECT='%s')",
+					DBSafe($title),
+					DBSafe($linkedObject)
+				);
+			}
+			// добавляем подменю в стек
+			if (!empty($item[12]) && is_array($item[12])) {
+				foreach ($item[12] as $child) {
+					$stack[] = $child;
+				}
+			}
 		}
+		// если нет условий — нечего удалять
+		if (empty($conditions)) {
+			return;
+		}
+		// 2. Получаем список ID команд + SUB_LIST
+		$where = implode(" OR ", $conditions);
+		$rows = SQLSelect("SELECT ID, SUB_LIST FROM commands WHERE {$where}");
+		if (empty($rows)) {
+			return;
+		}
+		// 3. Собираем все ID для удаления (сам пункт + его дети)
+		$idsToDelete = [];
+		foreach ($rows as $r) {
+			$id = (int)$r['ID'];
+			$idsToDelete[$id] = $id;
+			if (!empty($r['SUB_LIST'])) {
+				$children = explode(',', $r['SUB_LIST']);
+				foreach ($children as $childId) {
+					$childId = (int)$childId;
+					if ($childId > 0) {
+						$idsToDelete[$childId] = $childId;
+					}
+				}
+			}
+		}
+		// 4. Удаляем все команды одним SQL
+		$idList = implode(',', $idsToDelete);
+		SQLExec("DELETE FROM commands WHERE ID IN ({$idList})");
 	}
 }
 
