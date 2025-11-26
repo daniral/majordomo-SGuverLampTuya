@@ -205,39 +205,47 @@ if (($params['level'] ?? 1) == 0) {
   return;
 }
 
-$color = $params['color'] ?? null;
 $colorSaved = $this->getProperty('colorSaved');
-$colorLevel = $params['colorLevel'] ?? null;
+$color = $params['color']  ?? $colorSaved ?? '#FFFFFF';
 $colorLevelSaved = $this->getProperty('colorLevelSaved');
+$colorLevel = $params['colorLevel']  ?? $colorLevelSaved ?? 100;
 
-$level = $params['level'] ?? null;
+$level = $params['level']  ?? $levelSaved ?? 100;
 $levelSaved = $this->getProperty('levelSaved');
 
-$cct = $params['cct'] ?? null;
 $cctSaved = $this->getProperty('cctSaved');
+$cct = $params['cct']  ?? $cctSaved ?? 100;
 
-$sceneName = $params['sceneName'] ?? null;
 $sceneNameSaved = $this->getProperty('sceneNameSaved');
+$sceneName = $params['sceneName']  ?? $sceneNameSaved ?? 'Спокойная';
 
+$mode = $params['mode'] ?? $this->getProperty('mode') ?? '2';
+$dayNightMode = $params['mode'] ?? null;
 $autoMode = ($params['autoMode'] ?? 0) == 1;
-$mode = $this->getProperty('mode') ?? '2';
 
 // --- Обычный режим (без авто)
 if (!$autoMode) {
   if($mode == 1){
-    $this->setProperty('color', $color ?? $colorSaved ?? '#FFFFFF', 'noAutoMode');
-    $this->setProperty('colorLevel', $colorLevel ?? $colorLevelSaved ?? 100, 'noAutoMode');
+    $this->setProperty('color', $color, 'noAutoMode');
+    $this->setProperty('colorLevel', $colorLevel, 'noAutoMode');
   }elseif($mode == 2){
-    $this->setProperty('level', $level ?? $levelSaved ?? 100, 'noAutoMode');
-    $this->setProperty('cct', $cct ?? $cctSaved ?? 100, 'noAutoMode');
+    $this->setProperty('level', $level, 'noAutoMode');
+    $this->setProperty('cct', $cct, 'noAutoMode');
   }elseif($mode == 3){
-    $this->setProperty('sceneName', $sceneName ?? $sceneNameSaved ?? 'Спокойная', 'noAutoMode');
+    $this->setProperty('sceneName', $sceneName, 'noAutoMode');
   }
 }
 
 // --- Авто режим 
 if ($autoMode && !$this->getProperty('flag')) {
-  $levels = getAutoLevelCct($this, $level, $cct, $color, $colorLevel, $sceneName);
+  $levels = getAutoLevelCct($this, 
+                             $level, 
+                               $cct, 
+                             $color, 
+                        $colorLevel, 
+                         $sceneName, 
+                      $dayNightMode
+                    );
   if($levels['level'] !== null && $levels['cct'] !== null && $levels['color'] !== null && $levels['colorLevel'] !== null && $levels['sceneName'] !== null && $levels['dayNightMode'] !== null){
     if($levels['dayNightMode'] == 1){
       $this->setProperty('color', $levels['color'], 'autoMode');
