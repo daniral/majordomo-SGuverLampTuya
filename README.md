@@ -1,7 +1,8 @@
+
+<p align="center">
 # 💡 Tuya Guver Lamp
 ## Простое устройство для MajorDoMo
 
-<p align="center">
   <img src="https://img.shields.io/badge/PHP-7.4%2B-blue" />
   <img src="https://img.shields.io/badge/MajorDoMo-Device%20Module-green" />
   <img src="https://img.shields.io/badge/Status-Production-success" />
