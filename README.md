@@ -12,7 +12,7 @@
 
 ## 📘 Описание
 
-**`SGuverLampTuya`** — расширяет класс *SControllers* 
+**`SGuverLampTuya2`** — расширяет класс *SControllers* 
 > Простое устройство *Guver Lamp (Tuya)* для MajorDoMo.
 ---
 
