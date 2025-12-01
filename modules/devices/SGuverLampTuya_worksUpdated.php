@@ -55,58 +55,116 @@ if ($this->getProperty('color') === '') $this->setProperty('color', '#ffff00');
 if ($this->getProperty('level') === '') $this->setProperty('level', '50');
 if ($this->getProperty('cct') === '') $this->setProperty('cct', '10');
 if ($this->getProperty('scenesList') === '') $this->setProperty('scenesList','Спокойная=000e0d0000000000000000c80000,Чтение=010e0d0000000000000003e801f4,Работа=020e0d0000000000000003e803e8,Отдых=1b464603001803e803e800000000,Степь=04464602007803e803e800000000464602007803e8000a000000,Яркий=05464601000003e803e800000000464601007803e803e80000000046460100f003e803e800000000464601003d03e803e80000000046460100ae03e803e800000000464601011303e803e800000000,Яркий2=06464601000003e803e800000000464601007803e803e80000000046460100f003e803e800000000,Пёстрый=07464602000003e803e800000000464602007803e803e80000000046460200f003e803e800000000464602003d03e803e80000000046460200ae03e803e800000000464602011303e803e8000000,Мягкий=2946460200000000000003e800d246460200000000000000c800,Динамический=2a23230100000000000003e800d223230100000000000000c800d2,Ночной=08000000001e0320012c00000000,Синий неон=1446460200ae03e803e80000000046460200b4012c03e80000000046460200b4003203e8000000,Восход=1532320200f003e800640000000032320200f003e803e800000000464602012703e802ee00000000555502000003e803e800000000464602001302ee03e8000000004646020032025803e800000000323202005a038403e800000000,Закат=16323202005a0384006400000000323202005a038403e8000000004646020032025803e800000000505002001e02ee03e800000000323202000003e803e8000000,Океан=1746460200f003e803e80000000046460200dc02bc03e8000000,Подсолнух=184646020028032003e800000000464602001e038403e8000000004646020014038403e8000000,Лес=19464601007803e803e800000000464602006e0320025800000000464602005a038403e800000000,Кунг-Фу=1a464602000a038403e800000000464602000003e803e800000000,Свет свеча=1b464603001803e803e800000000,Фантазия=1c4646020104032003e800000000464602011802bc03e800000000464602011303e803e8000000,Средиземноморье=1d646401000003e803e80000000064640100f003e803e800000000646402007803e803e800000000646402003d03e803e8000000,Французский стиль=1e323201015e01f403e800000000323202003201f403e80000000032320200a001f403e800000000,Америка=1f46460100dc02bc03e800000000464602006e03200258000000004646020014038403e800000000464601012703e802ee0000000046460100000384028a00000000,День рождения=20646401003d03e803e800000000646401007803e803e8000000005a5a01011303e803e8000000005a5a0100ae03e803e800000000646401003201f403e800000000646401000003e803e8000000,Годовщина=21323202015e01f403e800000000323202011303e803e800000000,Рождество=225a5a0100f003e803e8000000005a5a01003d03e803e800000000464601000003e803e8000000005a5a0100ae03e803e8000000005a5a01011303e803e800000000464601007803e803e800000000,День независимости=23505002000003e803e80000000046460200f003e803e800000000,Дивали=24464602000003e803e800000000464602003d03e803e800000000464602011303e803e80000000046460200f003e803e800000000464602007803e803e800000000,Холи=25464601011303e803e800000000464602000003e803e800000000464602003d03e803e8000000004646010154032003e8000000004646010140032003e800000000464601001e02ee03e800000000,День победы=265a5a020014006403e800000000464602000003e803e800000000,Пасха=275a5a020014006403e800000000464602000003e803e800000000323202015e01f403e800000000464602011303e803e800000000,Хэллоуин=28464601011303e803e800000000464601001e03e803e800000000');
-if ($this->getProperty('sceneName') === '') $this->setProperty('csceneNamet', 'Спокойная');
+if ($this->getProperty('sceneName') === '') $this->setProperty('sceneName', 'Спокойная');
 
-$value = normalizeRange($params['NEW_VALUE'], 1, 1000);
-$colorLevel = $this->getProperty('colorLevel');
-$source = strtok($params['SOURCE'], " ");
-$property = $params['PROPERTY'];
+$property = $params['PROPERTY'] ?? null;
+$value = ($property === 'colorWork')
+    ? normalizeRange($params['NEW_VALUE'], 1, 100, 'color')
+    : (($property !== 'sceneWork')
+        ? normalizeRange($params['NEW_VALUE'], 1, 1000, 'number') / 10
+        : ($params['NEW_VALUE'] ?? null));$source   = strtok($params['SOURCE'] ?? '', ' ');
 
-if($source === 'propertysUpdated') return;
+// Защита от рекурсий. 
+if ($source === 'propertysUpdated' || is_null($value)) return;
 
-if(in_array($property, ['colorWork']) && !is_null($value)){
-	$data = hsvToRgbHex($value);
-	$colorLevel = $data['brightness'];
-	$colorRGB = $data['rgbHex'];
-	$this->setProperty('color', $colorRGB, 'worksUpdated');
-	$this->setProperty('colorSaved', $colorRGB);
-	$this->setProperty('colorLevel', $colorLevel, 'worksUpdated');
-}elseif(in_array($property, ['levelWork', 'cctWork']) && !is_null($value)){
-	$value=round($value / 10);
+//  Обработка colorWork: HSV -> RGB/Level ---
+if ($property === 'colorWork' ) {
+    // Преобразуем HSV в RGB Hex и Яркость
+    $data = hsvToRgbHex($value);
+    $color = $data['rgbHex'];
+    $colorLevel = $data['brightness'];
+    // Обновляем свойства.
+    $this->setProperty('color', $color, 'worksUpdated');
+    $this->setProperty('colorSaved', $color);
+    $this->setProperty('colorLevel', $colorLevel, 'worksUpdated');
+    $this->setProperty('colorLevelSaved', $colorLevel);
+    return; // Завершаем работу, если обработано colorWork
+}
+
+// Обработка levelWork , cctWork 
+if ($property === 'levelWork' || $property === 'cctWork') {
 	$this->setProperty(str_replace('Work', '', $property), $value, 'worksUpdated');
 	$this->setProperty(str_replace('Work', '', $property).'Saved', $value);
-/*
-	if($property == 'levelWork'){
-		$this->setProperty('level', $value, 'worksUpdated');
-		$this->setProperty('levelSaved', $value);
-	}elseif($property == 'cctWork'){
-		$this->setProperty('cct', $value, 'worksUpdated');
-		$this->setProperty('cctSaved', $value);
-	}
-*/
-}elseif(in_array($property, ['workScene']) && !is_null($params['NEW_VALUE'])){
-	$workScene = trim($params['NEW_VALUE'], " \t\n\r\0\x0B\"'");
-	$sceneNameToSet = 'unknown';
-	// Получаем список сцен и очищаем его от пробелов и кавычек по краям
-	$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
-
-	// Разбиваем на отдельные сцены (по запятой или переносу строки)
-	$sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
-
-	// Перебираем массив сцен
-	foreach ($sceneItems as $item) {
-		// Каждая сцена имеет формат "Имя=Значение"
-		$parts = explode('=', $item, 2); 
-		if (count($parts) == 2) {
-			$name  = $parts[0];
-			$scene = $parts[1];
-			// Если значение совпадает, обновляем sceneName
-			if ($workScene === $scene) {
-				$sceneNameToSet = $name;
-				$this->setProperty('sceneNameSaved', $sceneNameToSet);
-				break; // нашли нужную сцену, дальше не ищем
-			}
-		}
-	}
-	$this->setProperty('sceneName', $sceneNameToSet, 'worksUpdated');
+	return; // Завершаем работу, если обработано
 }
+
+//  Обработка sceneWork: Код Сцены -> Имя Сцены ---
+if ($property === 'sceneWork') {
+    $sceneWork = trim($value, " \t\n\r\0\x0B\"'");
+    $scenesListRaw = $this->getProperty('scenesList');
+    // Разбиваем список сцен на ассоциативный массив [код_сцены => имя_сцены]
+    $sceneMap = [];
+    $sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesListRaw, -1, PREG_SPLIT_NO_EMPTY);
+    foreach ($sceneItems as $item) {
+        [$name, $code] = array_map('trim', explode('=', $item, 2));
+        if ($name && $code) {
+            // Ключ - код сцены (sceneWork), Значение - имя сцены (sceneName)
+            $sceneMap[$code] = $name;
+        }
+    }
+    $sceneNameToSet = $sceneMap[$sceneWork] ?? 'unknown';
+    // Устанавливаем найденное имя и сохраняем его
+    if ($sceneNameToSet !== 'unknown') {
+        $this->setProperty('sceneNameSaved', $sceneNameToSet);
+    }
+    // Обновляем sceneName для UI
+    $this->setProperty('sceneName', $sceneNameToSet, 'worksUpdated');
+}
+
+
+
+
+
+// $value = normalizeRange($params['NEW_VALUE'], 1, 1000);
+// $colorLevel = $this->getProperty('colorLevel');
+// $source = strtok($params['SOURCE'], " ");
+// $property = $params['PROPERTY'];
+
+// if($source === 'propertysUpdated') return;
+
+// if(in_array($property, ['colorWork']) && !is_null($value)){
+// 	$data = hsvToRgbHex($value);
+// 	$colorLevel = $data['brightness'];
+// 	$colorRGB = $data['rgbHex'];
+// 	$this->setProperty('color', $colorRGB, 'worksUpdated');
+// 	$this->setProperty('colorSaved', $colorRGB);
+// 	$this->setProperty('colorLevel', $colorLevel, 'worksUpdated');
+// }elseif(in_array($property, ['levelWork', 'cctWork']) && !is_null($value)){
+// 	$value=round($value / 10);
+// 	$this->setProperty(str_replace('Work', '', $property), $value, 'worksUpdated');
+// 	$this->setProperty(str_replace('Work', '', $property).'Saved', $value);
+// /*
+// 	if($property == 'levelWork'){
+// 		$this->setProperty('level', $value, 'worksUpdated');
+// 		$this->setProperty('levelSaved', $value);
+// 	}elseif($property == 'cctWork'){
+// 		$this->setProperty('cct', $value, 'worksUpdated');
+// 		$this->setProperty('cctSaved', $value);
+// 	}
+// */
+// }elseif(in_array($property, ['workScene']) && !is_null($params['NEW_VALUE'])){
+// 	$workScene = trim($params['NEW_VALUE'], " \t\n\r\0\x0B\"'");
+// 	$sceneNameToSet = 'unknown';
+// 	// Получаем список сцен и очищаем его от пробелов и кавычек по краям
+// 	$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
+
+// 	// Разбиваем на отдельные сцены (по запятой или переносу строки)
+// 	$sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
+
+// 	// Перебираем массив сцен
+// 	foreach ($sceneItems as $item) {
+// 		// Каждая сцена имеет формат "Имя=Значение"
+// 		$parts = explode('=', $item, 2); 
+// 		if (count($parts) == 2) {
+// 			$name  = $parts[0];
+// 			$scene = $parts[1];
+// 			// Если значение совпадает, обновляем sceneName
+// 			if ($workScene === $scene) {
+// 				$sceneNameToSet = $name;
+// 				$this->setProperty('sceneNameSaved', $sceneNameToSet);
+// 				break; // нашли нужную сцену, дальше не ищем
+// 			}
+// 		}
+// 	}
+// 	$this->setProperty('sceneName', $sceneNameToSet, 'worksUpdated');
+// }
