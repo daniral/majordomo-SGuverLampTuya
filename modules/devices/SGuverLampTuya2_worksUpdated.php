@@ -55,8 +55,11 @@ $this->callMethod('byDefault');
 
 $property = $params['PROPERTY'] ?? null;
 $source   = strtok($params['SOURCE'] ?? '', ' ');
-$value = $property === 'colorWork' ? normalizeRange($params['NEW_VALUE']) : $property !== 'sceneWork' ? normalizeRange($params['NEW_VALUE'], 1, 1000, 'number') / 10 : $params['NEW_VALUE'] ?? null;
-
+$value = ($property === 'colorWork')
+    ? normalizeRange($params['NEW_VALUE'], 1, 100, 'color')
+    : (($property !== 'sceneWork')
+        ? normalizeRange($params['NEW_VALUE'], 1, 1000, 'number') / 10
+        : ($params['NEW_VALUE'] ?? null));
 
 // Защита от рекурсий. 
 if ($source === 'propertysUpdated' || is_null($value)) return;
