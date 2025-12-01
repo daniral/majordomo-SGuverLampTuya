@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/PHP-7.4%2B-blue" />
   <img src="https://img.shields.io/badge/MajorDoMo-Device%20Module-green" />
   <img src="https://img.shields.io/badge/Status-Production-success" />
-  <img src="https://img.shields.io/badge/Type-Smart%10Lighting-yellow" />
+  <img src="https://img.shields.io/badge/Type-Smart%20Lighting-yellow" />
 </p>
 
 ---
