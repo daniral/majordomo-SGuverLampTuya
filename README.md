@@ -8,6 +8,7 @@
   <img src="https://img.shields.io/badge/MajorDoMo-Device%20Module-green" />
   <img src="https://img.shields.io/badge/Status-Production-success" />
   <img src="https://img.shields.io/badge/Type-Smart%20Lighting-yellow" />
+  <img src="https://img.shields.io/badge/Version-1.0-orange" />
 </p>
 
 ---
