@@ -29,7 +29,7 @@
  * @property string $colorWork        Рабочий цвет HSV
  * @property string $colorSaved       Последний цвет
  *
- * @property string $modeWork        Режим работы лампы
+ * @property string $workMode        Режим работы лампы
  * @property string $sceneWork        Рабочая сцена
  * @property string $scenesList       Список сцен
  *
@@ -124,7 +124,7 @@ $this->device_types['GuverLampTuya2'] = array(
 		'colorSaved' => array('DESCRIPTION' => 'Последний цвет.'),
 		'colorLevel' => array('DESCRIPTION' => 'Яркость цветного света (1<-->100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'colorLevelSaved' => array('DESCRIPTION' => 'Последняя Яркость цветного света.', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
-		'modeWork' => array('DESCRIPTION' => 'Режим работы.'),
+		'workMode' => array('DESCRIPTION' => 'Режим работы.'),
 		'sceneWork' => array('DESCRIPTION' => 'Рабочая сцена.', 'ONCHANGE' => 'worksUpdated'),
 		'scenesList' => array('DESCRIPTION' => 'Список сцен.', 'ONCHANGE' => 'propertysUpdated'),
 		'sceneName' => array('DESCRIPTION' => 'Название текущей сцены.', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),

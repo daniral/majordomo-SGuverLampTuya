@@ -1,7 +1,7 @@
 <?php
 /*
-# ** 💡 Лампочка Guver Lanp (Tuya).**  
-## **Простое устройство для MajorDomo.**   
+# ** 💡 Лампочка Guver Lanp (Tuya).**
+## **Простое устройство для MajorDomo.**  
 Добавление в MajorDomo простого устройства для лампочеи Лампочка Guver Lanp (Tuya).  
 Управление цветом, яркостью, теплотой и сценами.   
 Расширяет встроенный класс SControllers.  
@@ -14,7 +14,7 @@
 ## ⚙️ Привязка свойств  
 
 - **switch_led   --> status**  
-- **work_mode    --> modeWork**  
+- **work_mode    --> workMode**  
 - **bright_value --> levelWork**  
 - **temp_value   --> cctWork**  
 - **colour_data  --> colorWork**  
@@ -165,63 +165,66 @@
 - **deleteCommandsMenu**  
   - Удалит меню данного объекта в "Меню Управления"  
 
-При первом запуске метода **turnOn** все нужные свойства для работы устройства должны прописаться сами.  */
+При первом запуске метода **turnOn** все нужные свойства для работы устройства должны прописаться сами.  
+*/
 
-/**
+/** Устанавливает и применяет настройки освещения (яркость, цвет, CCT, сцена) для устройства.
  *
- * @param array $params Массив входных параметров для управления лампой:
- *   - int|null   $params['level']       Уровень яркости (0–100). Если 0 — лампа выключается.
- *   - string|null $params['color']      Цвет в HEX формате (например, '#FFFFFF').
- *   - int|null   $params['colorLevel']  Яркость цвета (0–100).
- *   - int|null   $params['cct']         Теплота света (CCT) (0–100).
- *   - string|null $params['sceneName']  Название сцены (например, 'Спокойная').
- *   - bool|int   $params['autoMode']    Включение авто режима (1 — включен, 0 — выключен).
+ * Метод обрабатывает входные параметры, нормализует их и сохраняет как свойства
+ * связанного объекта MajorDoMo (например, 'Свет_в_комнате').
  *
- * @property string $color         Текущий цвет лампы (HEX), сохраняется при режиме color.
- * @property int    $colorLevel    Яркость цвета (0–100), сохраняется при режиме color.
- * @property int    $level         Уровень яркости белого света (0–100).
- * @property int    $cct           Теплота света (CCT) (0–100).
- * @property string $sceneName     Название текущей сцены.
- * @property bool   $autoMode      Флаг авто режима.
- * @property int    $mode          Текущий режим работы лампы:
- *                                1 — цветной свет,
- *                                2 — белый свет,
- *                                3 — сцена.
- * @property bool   $flag          Внутренний флаг для авто режима (защита от повторного вызова).
- * @property int    $timerOff      Время авто-выключения (в секундах), 0 — отключено.
+ * Логика выбора значений:
+ * 1. Берет значение из входного массива $params.
+ * 2. Если значение в $params отсутствует, и режим НЕ автоматический (!$autoMode),
+ * берется последнее сохраненное свойство ('...Saved').
+ * 3. Если и сохраненного свойства нет, используется значение по умолчанию.
+ *
+ * @param array $params Ассоциативный массив входных параметров для управления лампой.
+ *   - int|null   $params['level']      Уровень яркости белого света (1–100). Если 0 — лампа выключается (обрабатывается вне этого фрагмента).
+ *   - string|null $params['color']      Цвет в HEX формате (например, '#FFFFFF').
+ *   - int|null   $params['colorLevel']  Яркость цвета (1–100).
+ *   - int|null   $params['cct']        Теплота света (CCT) (1–100).
+ *   - string|null $params['sceneName']  Название сцены (например, 'Спокойная').
+ *   - bool|int   $params['autoMode']    Включение авто режима (1 — включен, 0 — выключен).
+ *   - int|string  $params['mode']      Принудительная установка режима (1, 2 или 3).
+ *
+ * @property string $color        Текущий цвет лампы (HEX).
+ * @property int    $colorLevel  Яркость цвета (1–100).
+ * @property int    $level        Уровень яркости белого света (1–100).
+ * @property int    $cct          Теплота света (CCT) (1–100).
+ * @property string $sceneName    Название текущей сцены.
+ * @property bool   $autoMode    Флаг, отражающий, был ли установлен текущий набор настроек автоматически.
+ * @property int    $mode        Текущий режим работы лампы:
+ *                                1 — цветной свет (color/colorLevel),
+ *                                2 — белый свет (level/cct),
+ *                                3 — сцена (sceneName).
+ * @property bool   $flag        Внутренний флаг, предотвращающий зацикливание или повторный запуск авто-логики.
+ * @property int    $timerOff    Время авто-выключения (в секундах), 0 — отключено.
  *
  * @return void
  *
- * @note
+ * @note В не-автоматическом режиме ('!$autoMode') сохраняются только параметры, соответствующие текущему $mode.
+ * В автоматическом режиме ('$autoMode') вызывается внешняя функция getAutoLevelCct() для получения настроек.
  */
 //
 
+
 // --- Дефолтные свойства
 $this->callMethod('byDefault');
-
-// --- Если level=0, выключаем
-if (($params['level'] ?? 1) == 0) {
-  $this->callMethod('turnOff');
-  return;
-}
+$autoMode = ($params['autoMode'] ?? 0) == 1;
 
 $colorSaved = $this->getProperty('colorSaved');
-$color = $params['color']  ?? $colorSaved ?? '#FFFFFF';
 $colorLevelSaved = $this->getProperty('colorLevelSaved');
-$colorLevel = $params['colorLevel']  ?? $colorLevelSaved ?? 100;
-
-$level = $params['level']  ?? $levelSaved ?? 100;
 $levelSaved = $this->getProperty('levelSaved');
-
 $cctSaved = $this->getProperty('cctSaved');
-$cct = $params['cct']  ?? $cctSaved ?? 100;
-
 $sceneNameSaved = $this->getProperty('sceneNameSaved');
-$sceneName = $params['sceneName']  ?? $sceneNameSaved ?? 'Спокойная';
 
-$mode = $params['mode'] ?? $this->getProperty('mode') ?? '2';
-$dayNightMode = $params['mode'] ?? null;
-$autoMode = ($params['autoMode'] ?? 0) == 1;
+$color = normalizeRange($params['color']) ?? (!$autoMode ? ($colorSaved ?? '#FFFFFF') : null);
+$colorLevel = normalizeRange($params['colorLevel'], 1, 100, 'number') ?? (!$autoMode ? ($colorLevelSaved ?? 100) : null);
+$level = normalizeRange($params['level'], 1, 100, 'number') ?? (!$autoMode ? ($levelSaved ?? 100) : null);
+$cct = normalizeRange($params['cct'], 1, 100, 'number') ?? (!$autoMode ? ($cctSaved ?? 100) : null);
+$sceneName = $params['sceneName'] ?? (!$autoMode ? ($sceneNameSaved ?? 'Спокойная') : null);
+$mode = $params['mode'] ?? (!$autoMode ? ($this->getProperty('mode') ?? '2') : null);
 
 // --- Обычный режим (без авто)
 if (!$autoMode) {
@@ -238,27 +241,88 @@ if (!$autoMode) {
 
 // --- Авто режим 
 if ($autoMode && !$this->getProperty('flag')) {
-  $levels = getAutoLevelCct($this, 
-                             $level, 
-                               $cct, 
-                             $color, 
-                        $colorLevel, 
-                         $sceneName, 
-                      $dayNightMode
-                    );
-  if($levels['level'] !== null && $levels['cct'] !== null && $levels['color'] !== null && $levels['colorLevel'] !== null && $levels['sceneName'] !== null && $levels['dayNightMode'] !== null){
-    if($levels['dayNightMode'] == 1){
+  $levels = getAutoLevelCct($this, $level, $cct, $color, $colorLevel, $sceneName, $mode);
+  if($levels['mode'] !== null){
+    if($levels['mode'] == 1 && $levels['color'] !== null && $levels['colorLevel'] !== null){
       $this->setProperty('color', $levels['color'], 'autoMode');
       $this->setProperty('colorLevel', $levels['colorLevel'], 'autoMode');
-    }elseif($levels['dayNightMode'] == 2){
+    }elseif($levels['mode'] == 2 && $levels['level'] !== null && $levels['cct'] !== null){
       $this->setProperty('level', $levels['level'], 'autoMode');
       $this->setProperty('cct', $levels['cct'], 'autoMode');
-    }elseif($levels['dayNightMode'] == 3){
+    }elseif($levels['mode'] == 3 && $levels['sceneName'] !== null){
       $this->setProperty('sceneName', $levels['sceneName'], 'autoMode');
     }
     // --- Авто-выключение
-	if ((int)$this->getProperty('timerOff') > 0)
-		autoOff($this);
+    if ((int)$this->getProperty('timerOff') > 0){
+      autoOff($this);
+    }
   }
 }
+
+
+// // --- Дефолтные свойства
+// $this->callMethod('byDefault');
+
+// // --- Если level=0, выключаем
+// if (($params['level'] ?? 1) == 0) {
+//   $this->callMethod('turnOff');
+//   return;
+// }
+
+// $colorSaved = $this->getProperty('colorSaved');
+// $color = $params['color']  ?? $colorSaved ?? '#FFFFFF';
+// $colorLevelSaved = $this->getProperty('colorLevelSaved');
+// $colorLevel = $params['colorLevel']  ?? $colorLevelSaved ?? 100;
+
+// $level = $params['level']  ?? $levelSaved ?? 100;
+// $levelSaved = $this->getProperty('levelSaved');
+
+// $cctSaved = $this->getProperty('cctSaved');
+// $cct = $params['cct']  ?? $cctSaved ?? 100;
+
+// $sceneNameSaved = $this->getProperty('sceneNameSaved');
+// $sceneName = $params['sceneName']  ?? $sceneNameSaved ?? 'Спокойная';
+
+// $mode = $params['mode'] ?? $this->getProperty('mode') ?? '2';
+// $dayNightMode = $params['mode'] ?? null;
+// $autoMode = ($params['autoMode'] ?? 0) == 1;
+
+// // --- Обычный режим (без авто)
+// if (!$autoMode) {
+//   if($mode == 1){
+//     $this->setProperty('color', $color, 'noAutoMode');
+//     $this->setProperty('colorLevel', $colorLevel, 'noAutoMode');
+//   }elseif($mode == 2){
+//     $this->setProperty('level', $level, 'noAutoMode');
+//     $this->setProperty('cct', $cct, 'noAutoMode');
+//   }elseif($mode == 3){
+//     $this->setProperty('sceneName', $sceneName, 'noAutoMode');
+//   }
+// }
+
+// // --- Авто режим 
+// if ($autoMode && !$this->getProperty('flag')) {
+//   $levels = getAutoLevelCct($this, 
+//                              $level, 
+//                                $cct, 
+//                              $color, 
+//                         $colorLevel, 
+//                          $sceneName, 
+//                       $dayNightMode
+//                     );
+//   if($levels['level'] !== null && $levels['cct'] !== null && $levels['color'] !== null && $levels['colorLevel'] !== null && $levels['sceneName'] !== null && $levels['dayNightMode'] !== null){
+//     if($levels['dayNightMode'] == 1){
+//       $this->setProperty('color', $levels['color'], 'autoMode');
+//       $this->setProperty('colorLevel', $levels['colorLevel'], 'autoMode');
+//     }elseif($levels['dayNightMode'] == 2){
+//       $this->setProperty('level', $levels['level'], 'autoMode');
+//       $this->setProperty('cct', $levels['cct'], 'autoMode');
+//     }elseif($levels['dayNightMode'] == 3){
+//       $this->setProperty('sceneName', $levels['sceneName'], 'autoMode');
+//     }
+//     // --- Авто-выключение
+// 	if ((int)$this->getProperty('timerOff') > 0)
+// 		autoOff($this);
+//   }
+// }
 
