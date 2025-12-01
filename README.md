@@ -156,8 +156,7 @@ pink, lime
 ```php
 callMethod('Object.turnOff');
 ```
-Сбрасывает `flag=0`
-           `illuminanceFlag = 0`
+Сбрасывает `flag=0` `illuminanceFlag = 0`
 ---
 ## Переключение
 ```php
