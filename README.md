@@ -1,19 +1,20 @@
-# 💡 SGuverLampTuya2 (Tuya Guver Lamp for MajorDoMo)
-
-> Управление цветом, яркостью, CCT, сценами и автоматическими режимами работы лампочек Tuya/Guver через MajorDoMo.
+# 💡 Tuya Guver Lamp - 2
+## Простое устройство для MajorDoMo
 
 <p align="center">
   <img src="https://img.shields.io/badge/PHP-7.4%2B-blue" />
   <img src="https://img.shields.io/badge/MajorDoMo-Device%20Module-green" />
   <img src="https://img.shields.io/badge/Status-Production-success" />
   <img src="https://img.shields.io/badge/Type-Smart%20Lighting-yellow" />
+  <img src="https://img.shields.io/badge/Version-2.0-orange" />
 </p>
-
 ---
 
 ## 📘 Описание
 
-**`SGuverLampTuya2`** — расширенный класс устройства MajorDoMo для ламп *Guver Lamp (Tuya)*.
+**`SGuverLampTuya`** — расширяет класс *SControllers* 
+> Простое устройство *Guver Lamp (Tuya)* для MajorDoMo.
+---
 Поддерживает:
 
 * Цветной свет
@@ -25,7 +26,6 @@
 * Создание и удаление меню управления в MajorDoMo
 
 При первом запуске автоматически создаются все необходимые свойства.
-
 ---
 
 # ⚙️ Привязка свойств
@@ -38,56 +38,48 @@
 | `temp_value`   | `cctWork`          |
 | `colour_data`  | `colorWork`        |
 | `scene_data`   | `sceneWork`        |
-
 ---
 
 # 🚦 Обычный режим
 
 Включение лампы:
-
 ```php
 callMethod('ObjectName.turnOn');
 ```
-
 Если параметры не указаны — берутся сохранённые (`...Saved`) или значения по умолчанию:
 
 | Параметр          | Если пусто |
 | ----------------- | ---------- |
 | `levelSaved`      | 100        |
 | `cctSaved`        | 100        |
-| `colorSaved`      | #FFFFFF    |
+| `colorSaved`      | #FFFFFF  |
 | `colorLevelSaved` | 100        |
 | `sceneNameSaved`  | Спокойная  |
 
 Включение с параметрами:
-
 ```php
 callMethod('Object.turnOn', [
   'level'      => 1..100,
-  'cct'        => 1..100,
-  'color'      => '#RRGGBB',
+  'cct'        => 1..100 или присеты,
+  'color'      => '#RRGGBB' , '#RGB' или присеты,
   'colorLevel' => 1..100,
   'sceneName'  => 'Название сцены'
 ]);
 ```
-
 При обычном включении ставится `flag=1`, блокируя авто-режим.
-
 ---
 
 # 🤖 Авто-режим
 
 Запуск:
-
 ```php
 callMethod('Object.turnOn', ['autoMode' => 1]);
 ```
-
 Особенности:
 
 * Работает таймер `timerOff` — авто-выключение.
 * Пока `presence=1` — не выключается.
-* При переходе `presence 1→0` — запускается `autoOff()`.
+* При изменении `presence` = 0 — запускается `autoOff()`.
 * Три режима работы: **День**, **Ночь**, **24 часа**
 
 ### Режимы по источнику (`workingBy`)
@@ -117,13 +109,12 @@ callMethod('Object.turnOn', ['autoMode' => 1]);
 * свойство `illuminance`
 * порог `illuminanceMax`
 
+Не проверялось. Нету датчика.
 ---
 
 # 🎨 Работа с цветом
 
-## Форматы цвета
-
-Цвет может задаваться:
+## Цвет может задаваться:
 
 ### ✔ HEX-кодами
 
@@ -133,13 +124,11 @@ callMethod('Object.turnOn', ['autoMode' => 1]);
 ### ✔ Цветовыми пресетами
 
 Используемые имена:
-
 ```
 red, green, blue, white, yellow,
 cyan, magenta, orange, purple,
 pink, lime
 ```
-
 ---
 
 # 🎬 Сцены
@@ -164,30 +153,22 @@ pink, lime
 # 🔧 Методы
 
 ### Отключение
-
 ```php
 callMethod('Object.turnOff');
 ```
-
 Сбрасывает `flag=0`
            `illuminanceFlag = 0`
-
 ---
-
 ## Переключение
-
 ```php
 callMethod('Object.switch');
 ```
-
 Поведение:
 
 * Если лампа **в авто-режиме** — включит сохранённые значения.
 * Если **выключена** — включит сохранённые значения.
 * Если **включена вручную** — выключит.
-
 ---
-
 ## Управление цветом
 
 | Метод            | Описание                 |
@@ -197,11 +178,17 @@ callMethod('Object.switch');
 | `colorLevelDown` | Уменьшить                |
 | `colorLevelUp`   | Увеличить                |
 
+```php
+callMethod('Имя Объекта.setColor', array("value"=>`#RRGGBB` или `#RGB` или присет));
+callMethod('Имя Объекта.setColorLevel', array("value"=>1--100));
+callMethod('Имя Объекта.colorLevelUp', array("value"=>1--100));
+  *callMethod('Имя Объекта.colorLevelUp'); увеличит на 10
+callMethod('Имя Объекта.colorLevelDown', array("value"=>1--100));
+  *callMethod('Имя Объекта.colorLevelUp'); уменьшит на 10
+```
 Все методы → `flag=1`.
-
 ---
-
-## Управление белым светом (яркость)
+## Управление белым светом (Яркость)
 
 | Метод       | Описание           |
 | ----------- | ------------------ |
@@ -209,10 +196,15 @@ callMethod('Object.switch');
 | `levelDown` | Уменьшить          |
 | `levelUp`   | Увеличить          |
 
+```php
+callMethod('Имя Объекта.setLevel', array("value"=>1--100));
+callMethod('Имя Объекта.levelUp', array("value"=>1--100));
+  *callMethod('Имя Объекта.levelUp'); увеличит на 10
+callMethod('Имя Объекта.levelDown', array("value"=>1--100));
+  *callMethod('Имя Объекта.levelDown'); уменьшит на 10
+```
 Все методы → `flag=1`.
-
 ---
-
 ## Управление CCT
 
 | Метод     | Описание               |
@@ -221,25 +213,24 @@ callMethod('Object.switch');
 | `cctDown` | Уменьшить              |
 | `cctUp`   | Увеличить              |
 
-Поддерживаются пресеты:
-
-```
-coolest, cool, warm, warmest
+```php
+callMethod('Имя Объекта.setCct', array("value"=>1--100 или присет));
+  *Присеты - `coolest`, `cool`, `warm`, `warmest`
+callMethod('Имя Объекта.cctUp', array("value"=>1--100));
+  *callMethod('Имя Объекта.cctUp'); увеличит на 10
+callMethod('Имя Объекта.cctDown', array("value"=>1--100));
+  *callMethod('Имя Объекта.cctDown'); уменьшит на 10
 ```
 Все методы → `flag=1`.
-
 ---
-
 ## Меню управления
 
 Создать меню:
-
 ```php
 callMethod('Object.createCommandsMenu');
 ```
 
 Удалить меню:
-
 ```php
 callMethod('Object.deleteCommandsMenu');
 ```
