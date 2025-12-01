@@ -187,6 +187,7 @@ callMethod('Имя Объекта.colorLevelDown', array("value"=>1--100));
   *callMethod('Имя Объекта.colorLevelUp'); уменьшит на 10
 ```
 Все методы → `flag=1`.
+
 ---
 ## Управление белым светом (Яркость)
 
