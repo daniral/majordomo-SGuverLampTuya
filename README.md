@@ -1,4 +1,4 @@
-# 💡 Tuya Guver Lamp - simpl devaise MajorDoMo
+# 💡 Tuya Guver Lamp
 ## Простое устройство для MajorDoMo
 
 <p align="center">
