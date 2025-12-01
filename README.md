@@ -150,9 +150,9 @@ pink, lime
 
 ---
 
-# 🔧 Методы
+# 🔧 Методы 
 
-### Отключение
+## Отключение 
 ```php
 callMethod('Object.turnOff');
 ```
