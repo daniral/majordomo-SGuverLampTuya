@@ -42,7 +42,7 @@
 
 # 🔧 Методы
 
-## Включение
+## 💡 Включение
 
 ```php
 callMethod('Object.turnOn');
