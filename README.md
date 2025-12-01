@@ -15,7 +15,6 @@
 
 **`SGuverLampTuya`** — расширяет класс *SControllers* 
 > Простое устройство *Guver Lamp (Tuya)* для MajorDoMo.
-> Управление цветом, яркостью, теплотой и сценами через MajorDoMo.
 
 Поддерживает управление:
 
@@ -100,7 +99,7 @@ callMethod('Object.turnOff');
 
 ```php
 callMethod('Object.switch');
-
+```
 ---
 
 ## Управление цветом
@@ -112,6 +111,15 @@ callMethod('Object.switch');
 | `colorLevelDown` | Уменьшить                |
 | `colorLevelUp`   | Увеличить                |
 
+```php
+callMethod('Имя Объекта.setColor', array("value"=>`#RRGGBB` или `#RGB` или присет));
+callMethod('Имя Объекта.setColorLevel', array("value"=>1--100));
+callMethod('Имя Объекта.colorLevelUp', array("value"=>1--100));
+  *callMethod('Имя Объекта.colorLevelUp'); увеличит на 10
+callMethod('Имя Объекта.colorLevelDown', array("value"=>1--100));
+  *callMethod('Имя Объекта.colorLevelUp'); уменьшит на 10
+```
+
 ---
 
 ## Управление белым светом (яркость)
@@ -119,8 +127,16 @@ callMethod('Object.switch');
 | Метод       | Описание           |
 | ----------- | ------------------ |
 | `setLevel`  | Установить яркость |
-| `levelDown` | Уменьшить          |
 | `levelUp`   | Увеличить          |
+| `levelDown` | Уменьшить          |
+
+```php
+callMethod('Имя Объекта.setLevel', array("value"=>1--100));
+callMethod('Имя Объекта.levelUp', array("value"=>1--100));
+  *callMethod('Имя Объекта.levelUp'); увеличит на 10
+callMethod('Имя Объекта.levelDown', array("value"=>1--100));
+  *callMethod('Имя Объекта.levelDown'); уменьшит на 10
+```
 
 ---
 
@@ -129,13 +145,16 @@ callMethod('Object.switch');
 | Метод     | Описание               |
 | --------- | ---------------------- |
 | `setCct`  | Установить температуру |
-| `cctDown` | Уменьшить              |
 | `cctUp`   | Увеличить              |
+| `cctDown` | Уменьшить              |
 
-Поддерживаются пресеты:
-
-```
-coolest, cool, warm, warmest
+```php
+callMethod('Имя Объекта.setCct', array("value"=>1--100 или присет));
+  *Присеты - `coolest`, `cool`, `warm`, `warmest`
+callMethod('Имя Объекта.cctUp', array("value"=>1--100));
+  *callMethod('Имя Объекта.cctUp'); увеличит на 10
+callMethod('Имя Объекта.cctDown', array("value"=>1--100));
+  *callMethod('Имя Объекта.cctDown'); уменьшит на 10
 ```
 
 ---
