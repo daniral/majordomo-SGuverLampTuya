@@ -111,10 +111,6 @@ if ($property === 'presence') {
 if ($property === 'color' || $property === 'colorLevel') {
     // Обновляем режим
     $this->setProperty('workMode', 'colour');
-    // Если значение реально изменилось — сохраняем
-    if ($value != $this->getProperty($property)) {
-        $this->setProperty($property, $value, 'worksUpdated');
-    }
     // Генерация HSV-HEX
     $color = $property === 'color' ? $value : $this->getProperty('color');
     $colorLevel = $property === 'colorLevel' ? $value : $this->getProperty('colorLevel');
@@ -126,10 +122,6 @@ if ($property === 'color' || $property === 'colorLevel') {
 if ($property === 'level' || $property === 'cct') {
     // Обновляем режим
 	$this->setProperty('workMode', 'white');
-	// Если значение реально изменилось — сохраняем
-    if ($value != $this->getProperty($property)) {
-        $this->setProperty($property, $value, 'worksUpdated');
-    }
 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
 }
 
@@ -166,8 +158,13 @@ if ($property !== 'scenesList') {
         $this->setProperty('flag', 1);
         $this->setProperty($property . 'Saved', $value);
     }
+    // Если значение реально изменилось — сохраняем
+    if ($value != $this->getProperty($property)) {
+        $this->setProperty($property, $value, 'worksUpdated');
+    }
     return;
 }
+
 // --- Обработка списка сцен scenesList
 if ($property === 'scenesList') {
     $raw = $this->getProperty('scenesList');
