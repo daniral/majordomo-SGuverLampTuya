@@ -226,6 +226,7 @@ callMethod('Object.switch');
 ```
 coolest, cool, warm, warmest
 ```
+Все методы → `flag=1`.
 
 ---
 
