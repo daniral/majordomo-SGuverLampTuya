@@ -1,3 +1,151 @@
+# 💡 Tuya Guver Lamp - simpl devaise MajorDoMo
+## Простое устройство для MajorDoMo
+
+> Управление цветом, яркостью, теплотой и сценами через MajorDoMo.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-7.4%2B-blue" />
+  <img src="https://img.shields.io/badge/MajorDoMo-Device%20Module-green" />
+  <img src="https://img.shields.io/badge/Status-Production-success" />
+  <img src="https://img.shields.io/badge/Type-Smart%1.0Lighting-yellow" />
+</p>
+
+---
+
+## 📘 Описание
+
+**`SGuverLampTuya`** — расширенный класс устройства *Guver Lamp (Tuya)* для MajorDoMo.
+
+Поддерживает управление:
+
+* Цветной свет
+* Белый свет (яркость + температура CCT)
+* Сцены
+
+---
+
+# ⚙️ Привязка свойств
+
+| Tuya поле      | Свойство MajorDoMo |
+| -------------- | ------------------ |
+| `switch_led`   | `status`           |
+| `work_mode`    | `workMode`         |
+| `bright_value` | `levelWork`        |
+| `temp_value`   | `cctWork`          |
+| `colour_data`  | `colorWork`        |
+| `scene_data`   | `sceneWork`        |
+
+`После привязки свойств надо поизменять свойства из приложения чтобы прилетели данные в объект`.
+
+---
+
+# 🎨 Работа с цветом
+
+## Форматы цвета
+
+Цвет может задаваться:
+
+### ✔ HEX-кодами
+
+* `#RRGGBB`
+* `#RGB`
+
+### ✔ Цветовыми пресетами
+
+Используемые имена:
+
+```
+red, green, blue, white, yellow,
+cyan, magenta, orange, purple,
+pink, lime
+```
+
+---
+
+# 🎬 Сцены
+
+## 📄 `scenesList`
+
+Формат:
+
+```
+Название=Код,Название2=Код2,...
+```
+
+Если пусто — создаётся список по умолчанию.
+
+## 🏷 `sceneName`
+
+Имя текущей активной сцены.
+Если указанной сцены нет — используется сохранённая.
+
+---
+
+# 🔧 Методы
+
+## Включение
+
+```php
+callMethod('Object.turnOn');
+```
+
+## Отключение
+
+```php
+callMethod('Object.turnOff');
+```
+
+## Переключение
+
+```php
+callMethod('Object.switch');
+
+---
+
+## Управление цветом
+
+| Метод            | Описание                 |
+| ---------------- | ------------------------ |
+| `setColor`       | Установить цвет          |
+| `setColorLevel`  | Установить яркость цвета |
+| `colorLevelDown` | Уменьшить                |
+| `colorLevelUp`   | Увеличить                |
+
+---
+
+## Управление белым светом (яркость)
+
+| Метод       | Описание           |
+| ----------- | ------------------ |
+| `setLevel`  | Установить яркость |
+| `levelDown` | Уменьшить          |
+| `levelUp`   | Увеличить          |
+
+---
+
+## Управление белым светом (теплота)
+
+| Метод     | Описание               |
+| --------- | ---------------------- |
+| `setCct`  | Установить температуру |
+| `cctDown` | Уменьшить              |
+| `cctUp`   | Увеличить              |
+
+Поддерживаются пресеты:
+
+```
+coolest, cool, warm, warmest
+```
+
+---
+# 📝 Поведение при первом запуске
+
+Метод `turnOn` автоматически создаёт все недостающие свойства устройства.
+
+---
+
+
+
 # 💡 Лампа Гайвера (Tuya)
 ### Простое устройство для MajorDoMo
 
