@@ -1,8 +1,6 @@
 # 💡 Tuya Guver Lamp - simpl devaise MajorDoMo
 ## Простое устройство для MajorDoMo
 
-> Управление цветом, яркостью, теплотой и сценами через MajorDoMo.
-
 <p align="center">
   <img src="https://img.shields.io/badge/PHP-7.4%2B-blue" />
   <img src="https://img.shields.io/badge/MajorDoMo-Device%20Module-green" />
@@ -15,7 +13,9 @@
 
 ## 📘 Описание
 
-**`SGuverLampTuya`** — расширенный класс устройства *Guver Lamp (Tuya)* для MajorDoMo.
+**`SGuverLampTuya`** — расширяет класс *SControllers* 
+> Простое устройство *Guver Lamp (Tuya)* для MajorDoMo.
+> Управление цветом, яркостью, теплотой и сценами через MajorDoMo.
 
 Поддерживает управление:
 
