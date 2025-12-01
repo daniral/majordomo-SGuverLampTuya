@@ -64,7 +64,7 @@ $value = ($property === 'colorWork')
 // Защита от рекурсий. 
 if ($source === 'propertysUpdated' || is_null($value)) return;
 
-$this->setProperty('flag', 1);
+//$this->setProperty('flag', 1);
 
 //  Обработка colorWork: HSV -> RGB/Level ---
 if ($property === 'colorWork' ) {
