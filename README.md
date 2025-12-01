@@ -205,6 +205,7 @@ callMethod('Имя Объекта.levelDown', array("value"=>1--100));
   *callMethod('Имя Объекта.levelDown'); уменьшит на 10
 ```
 Все методы → `flag=1`.
+
 ---
 ## Управление CCT
 
@@ -223,6 +224,7 @@ callMethod('Имя Объекта.cctDown', array("value"=>1--100));
   *callMethod('Имя Объекта.cctDown'); уменьшит на 10
 ```
 Все методы → `flag=1`.
+
 ---
 ## Меню управления
 
