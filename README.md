@@ -156,6 +156,7 @@ pink, lime
 ```php
 callMethod('Object.turnOff');
 ```
+
 Сбрасывает
 ---
 ## Переключение
