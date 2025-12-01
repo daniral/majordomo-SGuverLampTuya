@@ -83,11 +83,13 @@ if (isset($transform[$value])) {
 
 $property = $params['PROPERTY'] ?? null;
 $source   = strtok($params['SOURCE'] ?? '', ' ');
-$value = $property === 'color' ? normalizeRange($value, 1, 100, 'color') : 
-         $property !== 'sceneName' ? 
-         $property !== 'presence' ? normalizeRange($value, 1, 100, 'number') : 
-         normalizeRange($value, 0, 1, 'number') : 
-         $params['NEW_VALUE'] ?? null;
+$value = ($property === 'color')
+    ? normalizeRange($value, 1, 100, 'color') // Если color
+    : (($property === 'sceneName')
+        ? ($params['NEW_VALUE'] ?? null) // Если sceneName (сырое значение)
+        : (($property === 'presence')
+            ? normalizeRange($value, 0, 1, 'number') // Если presence (0 или 1)
+            : normalizeRange($value, 1, 100, 'number'))); // Иначе (level, cct, colorLevel)
 
 // --- Защита от рекурсий и не верных данных
 if ($source === 'worksUpdated' || is_null($value)) {
@@ -146,6 +148,7 @@ if ($property === 'sceneName') {
             $foundScen = true;
             $this->setProperty('workMode', 'scene');
             $this->setProperty('sceneWork', $scene, 'propertysUpdated');
+            break;
         }
     }
     // Сцена не найдена → откат
