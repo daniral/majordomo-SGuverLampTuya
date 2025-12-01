@@ -1,7 +1,7 @@
 <?php
 
  /** Обрабатывает изменения свойств устройства SGuverLampTuya2 (Лампа Гайвера Tuya)
- *   и синхронизирует его рабочее состояние ('Work' свойства), режимы ('workMode')
+ *   и синхронизирует его рабочее состояние ('Work' свойства), режимы ('work_mode')
  *   и сохраненные значения ('Saved' свойства).
  *
  * Функция выполняет следующие критические задачи:
@@ -67,12 +67,7 @@
 // --- Дефолтные свойства
 $this->callMethod('byDefault');
 
-$property = $params['PROPERTY'] ?? null;
 $value    = $params['NEW_VALUE'] ?? null;
-$source   = strtok($params['SOURCE'] ?? '', ' ');
-
-// --- Защита от рекурсий
-if ($source === 'worksUpdated') return;
 
 // --- Преобразование предустановок цвета
 static $transform = [
@@ -86,6 +81,22 @@ if (isset($transform[$value])) {
     $value = $transform[$value];
 }
 
+$property = $params['PROPERTY'] ?? null;
+$source   = strtok($params['SOURCE'] ?? '', ' ');
+$value = $property === 'color' ? normalizeRange($value, 1, 100, 'color') : 
+         $property !== 'sceneName' ? 
+         $property !== 'presence' ? normalizeRange($value, 1, 100, 'number') : 
+         normalizeRange($value, 0, 1, 'number') : 
+         $params['NEW_VALUE'] ?? null;
+
+// --- Защита от рекурсий и не верных данных
+if ($source === 'worksUpdated' || is_null($value)) {
+    if(is_null($value)){
+        $this->setProperty($property, $this->getProperty($property . 'Saved'), 'worksUpdated');
+    }
+    return;
+}
+
 // --- Обработка presence
 if ($property === 'presence') {
     if ((int)$this->getProperty('timerOff') > 0) {
@@ -94,93 +105,66 @@ if ($property === 'presence') {
     return;
 }
 
-// --- Цвет / Яркость цвета
+// --- Обработка Цвет / Яркость цвета
 if ($property === 'color' || $property === 'colorLevel') {
-    if ($property === 'color') {
-		$norm = normalizeRange($value, 1, 100, 'color');
-	} elseif ($property === 'colorLevel') {
-		$norm = normalizeRange($value, 1, 100, 'number');
-	}
-    if (is_null($norm)) {
-		$this->setProperty($property, $this->getProperty($property . 'Saved'), 'worksUpdated');
-		return;
-	}
     // Обновляем режим
     $this->setProperty('workMode', 'colour');
     // Если значение реально изменилось — сохраняем
-    if ($norm != $this->getProperty($property)) {
-        $this->setProperty($property, $norm, 'worksUpdated');
+    if ($value != $this->getProperty($property)) {
+        $this->setProperty($property, $value, 'worksUpdated');
     }
     // Генерация HSV-HEX
-    $color = $property === 'color' ? $norm : $this->getProperty('color');
-    $colorLevel = $property === 'colorLevel' ? $norm : $this->getProperty('colorLevel');
+    $color = $property === 'color' ? $value : $this->getProperty('color');
+    $colorLevel = $property === 'colorLevel' ? $value : $this->getProperty('colorLevel');
     $hsvHex = rgbToHSVhex($color, $colorLevel);
     $this->setProperty('colorWork', $hsvHex, 'propertysUpdated');
-	if (!$this->getProperty('status')) {
-        $this->setProperty('status', 1);
-    }
-    // Сохранение
-    if ($source !== 'autoMode') {
-        $this->setProperty('flag', 1);
-        $this->setProperty($property . 'Saved', $norm);
-    }
-    return;
 }
 
-// Яркость и теплота белого
+// --- Обработка Яркость / Теплота белого
 if ($property === 'level' || $property === 'cct') {
-	$norm = normalizeRange($value, 1, 100, 'number');
-	if (is_null($norm)) {
-		$this->setProperty($property, $this->getProperty($property . 'Saved'), 'worksUpdated');
-		return;
-	}
     // Обновляем режим
 	$this->setProperty('workMode', 'white');
 	// Если значение реально изменилось — сохраняем
-    if ($norm != $this->getProperty($property)) {
-        $this->setProperty($property, $norm, 'worksUpdated');
+    if ($value != $this->getProperty($property)) {
+        $this->setProperty($property, $value, 'worksUpdated');
     }
-
-	$this->setProperty($property . 'Work', round($norm * 10), 'propertysUpdated');
-	if (!$this->getProperty('status')) {
-        $this->setProperty('status', 1);
-    }
-    // Сохранение
-    if ($source !== 'autoMode') {
-        $this->setProperty('flag', 1);
-        $this->setProperty($property . 'Saved', $norm);
-    }
-    return;
+	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
 }
 
 // --- Обработка выбора сцены
 if ($property === 'sceneName') {
+    $foundScen = false;
     $sceneName = trim($value, " \t\n\r\0\x0B\"'");
     if ($sceneName === '' || $sceneName === 'unknown') return;
     $scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
     if ($scenesList === '') return;
     $sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
-    // Оптимизированный поиск
+    //  поиск
     foreach ($sceneItems as $item) {
         [$name, $scene] = array_pad(explode('=', $item, 2), 2, null);
         if ($name === $sceneName && $scene !== null) {
+            $foundScen = true;
             $this->setProperty('workMode', 'scene');
             $this->setProperty('sceneWork', $scene, 'propertysUpdated');
-            if (!$this->getProperty('status')) {
-                $this->setProperty('status', 1);
-            }
-            if ($source !== 'autoMode') {
-                $this->setProperty('flag', 1);
-                $this->setProperty('sceneNameSaved', $name);
-            }
-            return;
         }
     }
     // Сцена не найдена → откат
-    $this->setProperty('sceneName', $this->getProperty('sceneNameSaved'));
-    return;
+    if(!$foundScen){
+        $this->setProperty('sceneName', $this->getProperty('sceneNameSaved'));
+        return;
+    }
 }
 
+if ($property !== 'scenesList') {
+    if (!$this->getProperty('status')) {
+        $this->setProperty('status', 1);
+    }
+    if ($source !== 'autoMode') {
+        $this->setProperty('flag', 1);
+        $this->setProperty($property . 'Saved', $value);
+    }
+    return;
+}
 // --- Обработка списка сцен scenesList
 if ($property === 'scenesList') {
     $raw = $this->getProperty('scenesList');
@@ -301,7 +285,7 @@ if ($property === 'scenesList') {
 // 			// Если имя совпадает, обновляем sceneWork
 // 			if ($name === $sceneName) {
 // 				$foundName = true;
-// 				$this->setProperty('workMode', 'scene');
+// 				$this->setProperty('work_mode', 'scene');
 // 				$this->setProperty('sceneWork', $scene, 'propertysUpdated');
 // 				$this->setProperty('sceneNameSaved', $name);
 // 				if (!$status) $this->setProperty('status', 1);
