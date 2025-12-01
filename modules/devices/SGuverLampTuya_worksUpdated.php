@@ -49,7 +49,6 @@
  * @see setProperty() Метод установки свойства устройства
  */
 
-
 if ($this->getProperty('colorLevel') === '') $this->setProperty('colorLevel', '50');
 if ($this->getProperty('color') === '') $this->setProperty('color', '#ffff00');
 if ($this->getProperty('level') === '') $this->setProperty('level', '50');
@@ -58,11 +57,12 @@ if ($this->getProperty('scenesList') === '') $this->setProperty('scenesList','С
 if ($this->getProperty('sceneName') === '') $this->setProperty('sceneName', 'Спокойная');
 
 $property = $params['PROPERTY'] ?? null;
+$source   = strtok($params['SOURCE'] ?? '', ' ');
 $value = ($property === 'colorWork')
     ? normalizeRange($params['NEW_VALUE'], 1, 100, 'color')
     : (($property !== 'sceneWork')
         ? normalizeRange($params['NEW_VALUE'], 1, 1000, 'number') / 10
-        : ($params['NEW_VALUE'] ?? null));$source   = strtok($params['SOURCE'] ?? '', ' ');
+        : ($params['NEW_VALUE'] ?? null));
 
 // Защита от рекурсий. 
 if ($source === 'propertysUpdated' || is_null($value)) return;
