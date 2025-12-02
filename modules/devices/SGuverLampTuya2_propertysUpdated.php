@@ -89,7 +89,7 @@ $value = ($property === 'color')
         ? ($params['NEW_VALUE'] ?? null) // Если sceneName (сырое значение)
         : (($property === 'presence')
             ? normalizeRange($value, 0, 1, 'number') // Если presence (0 или 1)
-            : normalizeRange($value, 1, 100, 'number'))); // Иначе (level, cct, colorLevel)
+            : round(normalizeRange($value, 1, 100, 'number')))); // Иначе (level, cct, colorLevel)
 
 // --- Защита от рекурсий и не верных данных
 if ($source === 'worksUpdated' || is_null($value)) {

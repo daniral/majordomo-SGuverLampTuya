@@ -58,7 +58,7 @@ $source   = strtok($params['SOURCE'] ?? '', ' ');
 $value = ($property === 'colorWork')
     ? normalizeRange($params['NEW_VALUE'], 1, 100, 'color')
     : (($property !== 'sceneWork' || $property === 'scenesList')
-        ? normalizeRange($params['NEW_VALUE'], 1, 1000, 'number') / 10
+        ? round(normalizeRange($params['NEW_VALUE'], 1, 1000, 'number')) / 10
         : ($params['NEW_VALUE'] ?? null));
 
 // Защита от рекурсий. 
