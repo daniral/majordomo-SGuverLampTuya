@@ -162,6 +162,7 @@ $this->device_types['guverLampTuya2'] = array(
 		'illuminance' => array('DESCRIPTION' => 'Данные с датчика освещения', 'DATA_KEY' => 1),
 		'presence' => array('DESCRIPTION' => 'Данные с датчика присутствия', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'flag' => array('DESCRIPTION' => 'Стопер'),
+		'blockTuya' => array('DESCRIPTION' => 'Стопер для данных от туя'),
 	),
 	'METHODS' => array(
 		'turnOn' => array('DESCRIPTION' => 'Включить', '_CONFIG_SHOW' => 1),
@@ -180,6 +181,7 @@ $this->device_types['guverLampTuya2'] = array(
 		'setColorLevel' => array('DESCRIPTION' => 'Установить яркость цветного света.', '_CONFIG_SHOW' => 1, '_CONFIG_REQ_VALUE' => 1),
 		'worksUpdated' => array('DESCRIPTION' => 'Запускается при смене рабочих параметров'),
 		'propertysUpdated' => array('DESCRIPTION' => 'Запускается при смене параметров'),
+		'statusUpdated' => array('DESCRIPTION' => 'Запускается при смене статуса'),
 	
 		'byDefault' => array('DESCRIPTION' => 'Установить свойства по умолчанию.'),
 		'createCommandsMenu' => array('DESCRIPTION' => 'Создает меню управления.', '_CONFIG_SHOW' => 1),

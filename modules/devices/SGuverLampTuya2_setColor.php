@@ -3,6 +3,8 @@
  * Устанавливает цвет устройства.
  *      callMethod('Объект.setColor', array("value" => '#RRGGBB'));
  *      callMethod('Объект.setColor', array("value" => 'RRGGBB'));
+ *      callMethod('Объект.setColor', array("value" => '#RGB'));
+ *      callMethod('Объект.setColor', array("value" => 'RGB'));
  *      callMethod('Объект.setColor', array("value" => 'green'));
  * Метод принимает цвет двумя способами:
  *  - через параметр 'color';

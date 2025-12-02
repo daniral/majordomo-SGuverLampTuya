@@ -62,9 +62,9 @@ $value = ($property === 'colorWork')
         : ($params['NEW_VALUE'] ?? null));
 
 // Защита от рекурсий. 
-if ($source === 'propertysUpdated' || is_null($value)) return;
+if ($source === 'propertysUpdated' || is_null($value) || $this->getProperty('blockTuya')) return;
 
-//$this->setProperty('flag', 1);
+$this->setProperty('flag', 1);
 
 //  Обработка colorWork: HSV -> RGB/Level ---
 if ($property === 'colorWork' ) {
@@ -109,50 +109,3 @@ if ($property === 'sceneWork') {
     // Обновляем sceneName для UI
     $this->setProperty('sceneName', $sceneNameToSet, 'worksUpdated');
 }
-
-
-// $value = normalizeRange($params['NEW_VALUE'], 1, 1000);
-// $colorLevel = $this->getProperty('colorLevel');
-// $source = strtok($params['SOURCE'], " ");
-// $property = $params['PROPERTY'];
-
-// if($source === 'propertysUpdated') return;
-
-// if(in_array($property, ['colorWork']) && !is_null($value)){
-// 	$data = hsvToRgbHex($value);
-// 	$colorLevel = $data['brightness'];
-// 	$colorRGB = $data['rgbHex'];
-// 	$this->setProperty('color', $colorRGB, 'worksUpdated');
-// 	$this->setProperty('colorSaved', $colorRGB);
-// 	$this->setProperty('colorLevel', $colorLevel, 'worksUpdated');
-// 	$this->setProperty('colorLevelSaved', $colorLevel, 'worksUpdated');
-// }elseif(in_array($property, ['levelWork', 'cctWork']) && !is_null($value)){
-// 	$value=round($value / 10);
-// 	$this->setProperty(str_replace('Work', '', $property), $value, 'worksUpdated');
-// 	$this->setProperty(str_replace('Work', '', $property).'Saved', $value);
-// }elseif(in_array($property, ['sceneWork']) && !is_null($params['NEW_VALUE'])){
-// 	$sceneWork = trim($params['NEW_VALUE'], " \t\n\r\0\x0B\"'");
-// 	$sceneNameToSet = 'unknown';
-// 	// Получаем список сцен и очищаем его от пробелов и кавычек по краям
-// 	$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
-
-// 	// Разбиваем на отдельные сцены (по запятой или переносу строки)
-// 	$sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
-
-// 	// Перебираем массив сцен
-// 	foreach ($sceneItems as $item) {
-// 		// Каждая сцена имеет формат "Имя=Значение"
-// 		$parts = explode('=', $item, 2); 
-// 		if (count($parts) == 2) {
-// 			$name  = $parts[0];
-// 			$scene = $parts[1];
-// 			// Если значение совпадает, обновляем sceneName
-// 			if ($sceneWork === $scene) {
-// 				$sceneNameToSet = $name;
-// 				$this->setProperty('sceneNameSaved', $sceneNameToSet);
-// 				break; // нашли нужную сцену, дальше не ищем
-// 			}
-// 		}
-// 	}
-// 	$this->setProperty('sceneName', $sceneNameToSet, 'worksUpdated');
-// }

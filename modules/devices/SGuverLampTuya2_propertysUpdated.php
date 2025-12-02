@@ -99,6 +99,22 @@ if ($source === 'worksUpdated' || is_null($value)) {
     return;
 }
 
+$saveProperty = function ($obj) use ($property, $value, $source) {
+	if (!$obj->getProperty('status')) {
+		$obj->setProperty('status', 1);
+	}
+	if ($source !== 'autoMode') {
+		$obj->setProperty('flag', 1);
+		$obj->setProperty($property . 'Saved', $value);
+	}
+	$obj->setProperty('blockTuya', 1);
+	setTimeOut($obj->object_title.'blockTuyaTimer', "setGlobal('" . $obj->object_title . ".blockTuya', 0);", 8);
+	// Если значение реально изменилось — сохраняем
+	if ($value != $obj->getProperty($property)) {
+		$obj->setProperty($property, $value, 'worksUpdated');
+	}
+};
+
 // --- Обработка presence
 if ($property === 'presence') {
     if ((int)$this->getProperty('timerOff') > 0) {
@@ -109,6 +125,7 @@ if ($property === 'presence') {
 
 // --- Обработка Цвет / Яркость цвета
 if ($property === 'color' || $property === 'colorLevel') {
+	$saveProperty($this);
     // Обновляем режим
     $this->setProperty('modeWork', 'colour');
     // Генерация HSV-HEX
@@ -120,6 +137,7 @@ if ($property === 'color' || $property === 'colorLevel') {
 
 // --- Обработка Яркость / Теплота белого
 if ($property === 'level' || $property === 'cct') {
+	$saveProperty($this);
     // Обновляем режим
 	$this->setProperty('modeWork', 'white');
 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
@@ -127,7 +145,6 @@ if ($property === 'level' || $property === 'cct') {
 
 // --- Обработка выбора сцены
 if ($property === 'sceneName') {
-    $foundScen = false;
     $sceneName = trim($value, " \t\n\r\0\x0B\"'");
     if ($sceneName === '' || $sceneName === 'unknown') return;
     $scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
@@ -137,32 +154,15 @@ if ($property === 'sceneName') {
     foreach ($sceneItems as $item) {
         [$name, $scene] = array_pad(explode('=', $item, 2), 2, null);
         if ($name === $sceneName && $scene !== null) {
-            $foundScen = true;
+			$saveProperty($this);
             $this->setProperty('modeWork', 'scene');
             $this->setProperty('sceneWork', $scene, 'propertysUpdated');
-            break;
+            return;
         }
     }
     // Сцена не найдена → откат
-    if(!$foundScen){
-        $this->setProperty('sceneName', $this->getProperty('sceneNameSaved'));
-        return;
-    }
-}
-
-if ($property !== 'scenesList') {
-    if (!$this->getProperty('status')) {
-        $this->setProperty('status', 1);
-    }
-    if ($source !== 'autoMode') {
-        $this->setProperty('flag', 1);
-        $this->setProperty($property . 'Saved', $value);
-    }
-    // Если значение реально изменилось — сохраняем
-    if ($value != $this->getProperty($property)) {
-        $this->setProperty($property, $value, 'worksUpdated');
-    }
-    return;
+	$this->setProperty('sceneName', $this->getProperty('sceneNameSaved'));
+	return;
 }
 
 // --- Обработка списка сцен scenesList
@@ -218,158 +218,3 @@ if ($property === 'scenesList') {
     }
     return;
 }
-
-
-// $value = normalizeRange($value,1);
-// $colorSaved = $this->getProperty('colorSaved') ?? '#ffff00';
-// $colorLevel = normalizeRange($this->getProperty('colorLevel'),1);
-// $sceneName = trim($this->getProperty('sceneName'), " \t\n\r\0\x0B\"'");
-// $sceneNameSaved = $this->getProperty('sceneNameSaved') ?? 'unknown';
-
-// $source = strtok($params['SOURCE'], " ") ?? null;
-// $property = $params['PROPERTY'] ?? null;
-// $status = $this->getProperty('status') ?? 0;
-// $flag = $this->getProperty('flag') ?? 0;
-
-// if($source === 'worksUpdated') return;
-// if($source !== 'autoMode'){
-// 	if(!$flag) $this->setProperty('flag', 1);
-// }
-// $value = $params['NEW_VALUE'];
-// $transform = array(
-// 	'red'      => '#ff0000',
-// 	'green'    => '#00ff00',
-// 	'blue'     => '#0000ff',
-// 	'white'    => '#ffffff',
-// 	'yellow'   => '#ffff00',
-// 	'cyan'     => '#00ffff',
-// 	'magenta'  => '#ff00ff',
-// 	'orange'   => '#ffa500',
-// 	'purple'   => '#800080',
-// 	'pink'     => '#ffc0cb',
-// 	'lime'     => '#00ff00',
-// 	'coolest' => 100,
-// 	'cool'    => 66,
-// 	'warm'    => 33,
-// 	'warmest' => 1,
-// 	);
-// if (isset($transform[$value])) $value = $transform[$value];
-
-// if(!is_null($value)) $this->setProperty($property , $value, 'worksUpdated');
-
-// if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
-// 	if($property == 'colorLevel')  $value = $colorSaved;
-// 	$this->setProperty('modeWork', 'colour');
-// 	$hsvHex = rgbToHSVhex($value, $colorLevel)?: '003c03e801f4';
-// 	$this->setProperty('colorWork', $hsvHex, 'propertysUpdated');
-// 	if (!$status) $this->setProperty('status', 1);
-// 	$this->setProperty('colorSaved', $value);
-// 	$this->setProperty('colorLevelSaved', $colorLevel);
-// }elseif(in_array($property, ['level', 'cct']) && is_numeric($value)){
-// 	$this->setProperty('modeWork', 'white');
-// 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
-// 	if (!$status) $this->setProperty('status', 1);
-// 	$this->setProperty($property . 'Saved', $value);
-// }elseif(in_array($property, ['sceneName']) && $sceneName != 'unknown'){
-// 	// Получаем список сцен и очищаем его от пробелов, кавычек и переводов строк по краям
-// 	$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
-// 	// Разбиваем на отдельные сцены (по запятой или новой строке)
-// 	$sceneItems = preg_split('/\s*(?:,|\r\n|\n|\r)\s*/', $scenesList, -1, PREG_SPLIT_NO_EMPTY);
-// 	$foundName = false;
-// 	foreach ($sceneItems as $item) {
-// 		// Каждая сцена имеет формат "Имя=Значение"
-// 		$parts = explode('=', $item, 2); // ограничиваем на 2, чтобы значения с '=' не ломали парсинг
-// 		if (count($parts) == 2) {
-// 			$name  = $parts[0];
-// 			$scene = $parts[1];
-// 			// Если имя совпадает, обновляем sceneWork
-// 			if ($name === $sceneName) {
-// 				$foundName = true;
-// 				$this->setProperty('work_mode', 'scene');
-// 				$this->setProperty('sceneWork', $scene, 'propertysUpdated');
-// 				$this->setProperty('sceneNameSaved', $name);
-// 				if (!$status) $this->setProperty('status', 1);
-// 				break; // нашли нужную сцену, дальше не ищем
-// 			}
-// 		}
-// 	}
-// 	if(!$foundName){
-// 		$this->setProperty('sceneName', $sceneNameSaved);
-// 	}
-// }elseif(in_array($property, ['scenesList'])){
-// 	$objectName = $this->object_title;
-// 	// ---------------------------------------------
-// 	// 1. Очистка и валидирование scenesList
-// 	// ---------------------------------------------
-// 	$rawScenesList = $this->getProperty('scenesList');
-// 	// Удаляем переносы строк — безопасно
-// 	$rawScenesListNormalized = str_replace(["\r", "\n"], '', $rawScenesList);
-// 	// Разбиваем ТОЛЬКО по запятым
-// 	$sceneItems = explode(',', $rawScenesListNormalized);
-// 	$cleanItems = [];
-// 	foreach ($sceneItems as $item) {
-// 		// trim только по краям
-// 		$item = trim($item);
-// 		if ($item === '') continue; // пустой элемент - невалиден
-// 		// Должен быть знак '='
-// 		if (strpos($item, '=') === false) continue;
-// 		// Разделяем имя и значение
-// 		[$name, $val] = explode('=', $item, 2);
-// 		// Тоже trim только по краям
-// 		$name = trim($name);
-// 		$val  = trim($val);
-// 		// Проверяем валидность
-// 		if ($name === '' || $val === '') continue;
-// 		// Имя и значение оставляем как есть (внутренние пробелы и табы не трогаем)
-// 		$cleanItems[] = $name . '=' . $val;
-// 	}
-// 	// Собираем строку обратно
-// 	$cleanScenesList = implode(',', $cleanItems);
-// 	// Если строка изменилась — записываем и выходим,
-// 	// метод запустится снова автоматически
-// 	if ($cleanScenesList !== $rawScenesList) {
-// 		$this->setProperty('scenesList', $cleanScenesList);
-// 		return;
-// 	}
-// 	// ---------------------------------------------
-// 	// 2. Синхронизация с таблицей commands
-// 	// ---------------------------------------------
-// 	$props = ['sceneName', 'dayScene', 'nightScene'];
-// 	foreach ($props as $propName) {
-// 		// Ищем команду
-// 		$rec = SQLSelectOne("
-// 			SELECT *
-// 			FROM commands
-// 			WHERE LINKED_OBJECT='" . DBSafe($objectName) . "'
-// 			AND LINKED_PROPERTY='" . DBSafe($propName) . "'
-// 			LIMIT 1
-// 		");
-// 		if (!$rec) continue;
-// 		// Список сцен из commands.DATA
-// 		$commandsScenes = [];
-// 		if (!empty($rec['DATA'])) {
-// 			$sceneItems = preg_split('/\r\n|\n|\r/', trim($rec['DATA']));
-// 			foreach ($sceneItems as $item) {
-// 				$parts = explode('=', $item, 2);
-// 				$commandsScenes[] = trim($parts[0]);
-// 			}
-// 		}
-// 		// Список сцен из объекта
-// 		$scenesList = $cleanScenesList; // уже очищенный вариант
-// 		$sceneItems = explode(',', $scenesList);
-// 		$objectScenes = [];
-// 		foreach ($sceneItems as $item) {
-// 			$parts = explode('=', $item, 2);
-// 			if (!empty($parts[0])) {
-// 				$objectScenes[] = trim($parts[0]);
-// 			}
-// 		}
-// 		// Обновляем commands.DATA если отличается
-// 		if ($commandsScenes !== $objectScenes) {
-// 			$rec['DATA'] = implode("\r\n", $objectScenes);
-// 			SQLUpdate('commands', $rec);
-// 		}
-// 	}
-// 	return;
-// }
-
