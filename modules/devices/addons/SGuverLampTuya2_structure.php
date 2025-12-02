@@ -107,11 +107,11 @@ if (SETTINGS_SITE_LANGUAGE && file_exists(ROOT . 'languages/SGuverLampTuya2_' . 
 	include_once(ROOT . 'languages/SGuverLampTuya2_default.php'); 
 }
 
-$this->device_types['GuverLampTuya2'] = array(
+$this->device_types['guverLampTuya2'] = array(
 	'TITLE' => 'Освещение (Tuya Guver Lamp) - 2',
 	'PARENT_CLASS' => 'SControllers',
 	'CLASS' => 'SGuverLampTuya2',
-	'DESCRIPTION'=>'Лампа Гайвера(Tuya)2',
+	'DESCRIPTION'=>'Tuya Guver Lamp - 2',
 	'PROPERTIES' => array(
 		'level' => array('DESCRIPTION' => 'Уровень яркости белого(1<-->100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'levelWork' => array('DESCRIPTION' => 'Рабочая яркость белого (1<-->1000).', 'ONCHANGE' => 'worksUpdated'),
