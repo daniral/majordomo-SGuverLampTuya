@@ -27,4 +27,8 @@
 
 if (!isset($params['color']) && !isset($params['value'])) return;
 
-$this->setProperty('color', $params['color'] ?? $params['value']);
+
+$color = $params['color'] ?? $params['value'] ?? null;
+if ($color === null) return;
+
+$this->setProperty('color', $color);
