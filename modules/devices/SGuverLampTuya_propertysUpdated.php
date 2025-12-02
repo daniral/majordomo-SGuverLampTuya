@@ -27,7 +27,7 @@
  *
  * Обработка сцен:
  *   - Список сцен хранится в свойстве scenesList в формате "Имя=Значение"
- *   - Рабочая сцена устанавливается в workScene
+ *   - Рабочая сцена устанавливается в sceneWork
  *   - При совпадении имени сцены с sceneName сохраняется состояние
  *
  * Особенности:
@@ -237,13 +237,13 @@ if ($property === 'scenesList') {
 
 // if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 // 	if($property == 'colorLevel')  $value = $colorSaved;
-// 	$this->setProperty('work_mode', 'colour');
+// 	$this->setProperty('workMode', 'colour');
 // 	$hsvHex = rgbToHSVhex($value, $colorLevel)?: '003c03e801f4';
 // 	$this->setProperty('colorWork', $hsvHex, 'propertysUpdated');
 // 	if (!$status) $this->setProperty('status', 1);
 // 	$this->setProperty('colorSaved', $value);
 // }elseif(in_array($property, ['level', 'cct']) && is_numeric($value)){
-// 	$this->setProperty('work_mode', 'white');
+// 	$this->setProperty('workMode', 'white');
 // 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
 // 	if (!$status) $this->setProperty('status', 1);
 // 	$this->setProperty($property . 'Saved', $value);
@@ -259,11 +259,11 @@ if ($property === 'scenesList') {
 // 		if (count($parts) == 2) {
 // 			$name  = $parts[0];
 // 			$scene = $parts[1];
-// 			// Если имя совпадает, обновляем workScene
+// 			// Если имя совпадает, обновляем sceneWork
 // 			if ($name === $sceneName) {
 // 				$foundName = true;
-// 				$this->setProperty('work_mode', 'scene');
-// 				$this->setProperty('workScene', $scene, 'propertysUpdated');
+// 				$this->setProperty('workMode', 'scene');
+// 				$this->setProperty('sceneWork', $scene, 'propertysUpdated');
 // 				$this->setProperty('sceneNameSaved', $name);
 // 				if (!$status) $this->setProperty('status', 1);
 // 				break; // нашли нужную сцену, дальше не ищем

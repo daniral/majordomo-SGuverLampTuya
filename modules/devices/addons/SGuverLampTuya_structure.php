@@ -32,8 +32,8 @@
  *  - colorLevel: Яркость белого цвета (0–100), обновление вызывает propertysUpdated
  *  - colorWork: Рабочий цвет (HSV), обновление вызывает worksUpdated
  *  - colorSaved: Последний цвет
- *  - work_mode: Режим работы
- *  - workScene: Рабочая сцена, обновление вызывает worksUpdated
+ *  - workMode: Режим работы
+ *  - sceneWork: Рабочая сцена, обновление вызывает worksUpdated
  *  - scenesList: Список сцен
  *  - sceneName: Текущая сцена, обновление вызывает propertysUpdated
  *  - sceneNameSaved: Последняя сцена
@@ -79,8 +79,8 @@ $this->device_types['GuverLampTuya'] = array(
 		'colorLevel' => array('DESCRIPTION' => 'Яркость цветного света (0<-->100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'colorWork' => array('DESCRIPTION' => 'Рабочий цвет (HSV).', 'ONCHANGE' => 'worksUpdated'),
 		'colorSaved' => array('DESCRIPTION' => 'Последний цвет.'),
-		'work_mode' => array('DESCRIPTION' => 'Режим работы.'),
-		'workScene' => array('DESCRIPTION' => 'Рабочая сцена.', 'ONCHANGE' => 'worksUpdated'),
+		'workMode' => array('DESCRIPTION' => 'Режим работы.'),
+		'sceneWork' => array('DESCRIPTION' => 'Рабочая сцена.', 'ONCHANGE' => 'worksUpdated'),
 		'scenesList' => array('DESCRIPTION' => 'Список сцен.', 'ONCHANGE' => 'propertysUpdated'),
 		'sceneName' => array('DESCRIPTION' => 'Название текущей сцены.', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'sceneNameSaved' => array('DESCRIPTION' => 'Последняя сцена.'),

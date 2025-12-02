@@ -7,14 +7,14 @@
  * - colorWork (цвет в формате HSV, преобразуется в RGB и сохраняется)
  * - levelWork (рабочий уровень яркости белого)
  * - cctWork (рабочая температура белого)
- * - workScene (рабочая сцена, устанавливается имя сцены)
+ * - sceneWork (рабочая сцена, устанавливается имя сцены)
  *
  * Логика обработки:
  * 1. Если свойства colorLevel, color, level или cct пусты, устанавливаются значения по умолчанию.
  * 2. Игнорируется источник 'propertysUpdated', чтобы избежать рекурсивных вызовов.
  * 3. colorWork преобразуется в RGB и обновляется color, colorSaved и colorLevel.
  * 4. levelWork и cctWork преобразуются в значения для отображения (деление на 10 для уровня и температуры).
- * 5. workScene сверяется с scenesList и обновляет sceneName и sceneNameSaved.
+ * 5. sceneWork сверяется с scenesList и обновляет sceneName и sceneNameSaved.
  *
  * Особенности обработки scenesList:
  * - Каждая сцена хранится в формате "Имя=Значение"
@@ -26,7 +26,7 @@
  *     Входные параметры изменения свойства.
  *
  *     @type string SOURCE Источник изменения свойства ('user', 'worksUpdated', 'propertysUpdated')
- *     @type string PROPERTY Имя изменяемого свойства ('colorWork', 'levelWork', 'cctWork', 'workScene')
+ *     @type string PROPERTY Имя изменяемого свойства ('colorWork', 'levelWork', 'cctWork', 'sceneWork')
  *     @type mixed  NEW_VALUE Новое значение свойства
  * }
  *
@@ -142,8 +142,8 @@ if ($property === 'sceneWork') {
 // 		$this->setProperty('cctSaved', $value);
 // 	}
 // */
-// }elseif(in_array($property, ['workScene']) && !is_null($params['NEW_VALUE'])){
-// 	$workScene = trim($params['NEW_VALUE'], " \t\n\r\0\x0B\"'");
+// }elseif(in_array($property, ['sceneWork']) && !is_null($params['NEW_VALUE'])){
+// 	$sceneWork = trim($params['NEW_VALUE'], " \t\n\r\0\x0B\"'");
 // 	$sceneNameToSet = 'unknown';
 // 	// Получаем список сцен и очищаем его от пробелов и кавычек по краям
 // 	$scenesList = trim($this->getProperty('scenesList'), " \t\n\r\0\x0B\"'");
@@ -159,7 +159,7 @@ if ($property === 'sceneWork') {
 // 			$name  = $parts[0];
 // 			$scene = $parts[1];
 // 			// Если значение совпадает, обновляем sceneName
-// 			if ($workScene === $scene) {
+// 			if ($sceneWork === $scene) {
 // 				$sceneNameToSet = $name;
 // 				$this->setProperty('sceneNameSaved', $sceneNameToSet);
 // 				break; // нашли нужную сцену, дальше не ищем
