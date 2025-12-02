@@ -13,17 +13,17 @@
  * 4. Обработка 'presence': При изменении присутствия запускает таймер 'autoOff', если установлен.
  * 5. Обработка цветного света ('color', 'colorLevel'):
  * - Валидирует и нормализует входящие значения (HEX-цвет и уровень яркости 1-100).
- * - Устанавливает 'workMode' в 'colour'.
+ * - Устанавливает 'modeWork' в 'colour'.
  * - Конвертирует RGB-HEX и 'colorLevel' в 12-символьный HSV-HEX код ('colorWork').
  * - Устанавливает 'status' в 1 (вкл.) и сохраняет новые значения.
  * 6. Обработка белого света ('level', 'cct'):
  * - Валидирует и нормализует яркость и теплоту белого (1-100).
- * - Устанавливает 'workMode' в 'white'.
+ * - Устанавливает 'modeWork' в 'white'.
  * - Преобразует значение в рабочий формат (умножение на 10, например, 'levelWork').
  * - Устанавливает 'status' в 1 (вкл.) и сохраняет новые значения.
  * 7. Обработка сцены ('sceneName'):
  * - Ищет код сцены в 'scenesList' по имени.
- * - При успешном поиске устанавливает 'workMode' в 'scene' и код сцены в 'sceneWork'.
+ * - При успешном поиске устанавливает 'modeWork' в 'scene' и код сцены в 'sceneWork'.
  * - Устанавливает 'status' в 1 (вкл.) и сохраняет имя сцены ('sceneNameSaved').
  * - При неудаче откатывается к сохраненному имени сцены.
  * 8. Синхронизация списка сцен ('scenesList'):
@@ -49,7 +49,7 @@
  * @property string scenesList  Строка списка сцен в формате "Имя=Значение,..."
  * @property int    status      Включено (1) или Выключено (0).
  *
- * @property string workMode   Текущий режим работы: 'white', 'colour', или 'scene'.
+ * @property string modeWork   Текущий режим работы: 'white', 'colour', или 'scene'.
  * @property string colorWork   12-символьный HSV-HEX код для отправки устройству.
  * @property string levelWork   Рабочее значение яркости белого света (level * 10).
  * @property string cctWork     Рабочее значение цветовой температуры (cct * 10).
@@ -85,7 +85,7 @@ $property = $params['PROPERTY'] ?? null;
 $source   = strtok($params['SOURCE'] ?? '', ' ');
 $value = ($property === 'color')
     ? normalizeRange($value, 1, 100, 'color') // Если color
-    : (($property === 'sceneName')
+    : (($property === 'sceneName' || $property === 'scenesList')
         ? ($params['NEW_VALUE'] ?? null) // Если sceneName (сырое значение)
         : (($property === 'presence')
             ? normalizeRange($value, 0, 1, 'number') // Если presence (0 или 1)
@@ -110,7 +110,7 @@ if ($property === 'presence') {
 // --- Обработка Цвет / Яркость цвета
 if ($property === 'color' || $property === 'colorLevel') {
     // Обновляем режим
-    $this->setProperty('workMode', 'colour');
+    $this->setProperty('modeWork', 'colour');
     // Генерация HSV-HEX
     $color = $property === 'color' ? $value : $this->getProperty('color');
     $colorLevel = $property === 'colorLevel' ? $value : $this->getProperty('colorLevel');
@@ -121,7 +121,7 @@ if ($property === 'color' || $property === 'colorLevel') {
 // --- Обработка Яркость / Теплота белого
 if ($property === 'level' || $property === 'cct') {
     // Обновляем режим
-	$this->setProperty('workMode', 'white');
+	$this->setProperty('modeWork', 'white');
 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
 }
 
@@ -138,7 +138,7 @@ if ($property === 'sceneName') {
         [$name, $scene] = array_pad(explode('=', $item, 2), 2, null);
         if ($name === $sceneName && $scene !== null) {
             $foundScen = true;
-            $this->setProperty('workMode', 'scene');
+            $this->setProperty('modeWork', 'scene');
             $this->setProperty('sceneWork', $scene, 'propertysUpdated');
             break;
         }
@@ -259,14 +259,14 @@ if ($property === 'scenesList') {
 
 // if(in_array($property, ['color', 'colorLevel']) && !is_null($value)){
 // 	if($property == 'colorLevel')  $value = $colorSaved;
-// 	$this->setProperty('workMode', 'colour');
+// 	$this->setProperty('modeWork', 'colour');
 // 	$hsvHex = rgbToHSVhex($value, $colorLevel)?: '003c03e801f4';
 // 	$this->setProperty('colorWork', $hsvHex, 'propertysUpdated');
 // 	if (!$status) $this->setProperty('status', 1);
 // 	$this->setProperty('colorSaved', $value);
 // 	$this->setProperty('colorLevelSaved', $colorLevel);
 // }elseif(in_array($property, ['level', 'cct']) && is_numeric($value)){
-// 	$this->setProperty('workMode', 'white');
+// 	$this->setProperty('modeWork', 'white');
 // 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
 // 	if (!$status) $this->setProperty('status', 1);
 // 	$this->setProperty($property . 'Saved', $value);

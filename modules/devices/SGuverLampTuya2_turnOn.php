@@ -14,7 +14,7 @@
 ## ⚙️ Привязка свойств  
 
 - **switch_led   --> status**  
-- **work_mode    --> workMode**  
+- **work_mode    --> modeWork**  
 - **bright_value --> levelWork**  
 - **temp_value   --> cctWork**  
 - **colour_data  --> colorWork**  
