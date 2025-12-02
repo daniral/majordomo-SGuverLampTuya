@@ -13,7 +13,7 @@
  *
  * @see SETTINGS_SITE_LANGUAGE
  *
- * @property array $device_types['GuverLampTuya'] Структура описания устройства
+ * @property array $device_types['modeWork'] Структура описания устройства
  * @property string TITLE Название устройства для интерфейса
  * @property string PARENT_CLASS Родительский класс устройства
  * @property string CLASS Класс устройства
@@ -63,11 +63,11 @@ if (SETTINGS_SITE_LANGUAGE && file_exists(ROOT . 'languages/SGuverLampTuya_' . S
 	include_once(ROOT . 'languages/SGuverLampTuya_default.php'); 
 }
 
-$this->device_types['GuverLampTuya'] = array(
-	'TITLE' => 'Освещение (Лампа Гайвера Tuya)',
+$this->device_types['guverLampTuya'] = array(
+	'TITLE' => 'Освещение (Tuya Guver Lamp)',
 	'PARENT_CLASS' => 'SControllers',
 	'CLASS' => 'SGuverLampTuya',
-	'DESCRIPTION'=>'Лампа Гайвера(Tuya)',
+	'DESCRIPTION'=>'Tuya Guver Lamp',
 	'PROPERTIES' => array(
 		'level' => array('DESCRIPTION' => 'Уровень яркости белого(0<-->100).', 'ONCHANGE' => 'propertysUpdated', 'DATA_KEY' => 1),
 		'levelWork' => array('DESCRIPTION' => 'Рабочая яркость белого (0<-->1000).', 'ONCHANGE' => 'worksUpdated'),
