@@ -129,7 +129,7 @@ if ($source === 'worksUpdated' || is_null($value)) {
 // --- Обработка Цвет / Яркость цвета
 if ($property === 'color' || $property === 'colorLevel') {
     // Обновляем режим
-    $this->setProperty('workMode', 'colour');
+    $this->setProperty('modeWork', 'colour');
     // Генерация HSV-HEX
     $color = $property === 'color' ? $value : $this->getProperty('color');
     $colorLevel = $property === 'colorLevel' ? $value : $this->getProperty('colorLevel');
@@ -140,7 +140,7 @@ if ($property === 'color' || $property === 'colorLevel') {
 // --- Обработка Яркость / Теплота белого
 if ($property === 'level' || $property === 'cct') {
     // Обновляем режим
-	$this->setProperty('workMode', 'white');
+	$this->setProperty('modeWork', 'white');
 	$this->setProperty($property . 'Work', round($value * 10), 'propertysUpdated');
 }
 
@@ -157,7 +157,7 @@ if ($property === 'sceneName') {
         [$name, $scene] = array_pad(explode('=', $item, 2), 2, null);
         if ($name === $sceneName && $scene !== null) {
             $foundScen = true;
-            $this->setProperty('workMode', 'scene');
+            $this->setProperty('modeWork', 'scene');
             $this->setProperty('sceneWork', $scene, 'propertysUpdated');
 			break;
         }
