@@ -171,6 +171,46 @@ if ($device_type == 'SGuverLampTuya') {
         }
     }
 
+    // --- ТЕМПЕРАТУРА БЕЛОГО СВЕТА (white temp) ---
+    elseif (preg_match('/' . LANG_SGuverLampTuya_PATTERN_TEMPERATURE . '/uis', $command)) {
+        $currentLevel = (int)getGlobal("$linked_object.cct");
+        $step = 10; // Шаг изменения по умолчанию
+        
+        // Установка по числу: "температура 70" (от 0 до 100)
+        if (preg_match('/(?:\s)(\d{1,2}|100)(?:%|\s|$)/uis', $command, $matches)) {
+            $value = (int)$matches[1];
+        }
+        // Установка по абсолютному значению
+        elseif (preg_match('/(холодн|синее|прохладн)/uis', $command)) {
+            // Холодный белый (ближе к 100%)
+            $value = 100;
+        }
+        elseif (preg_match('/(тепл|желт)/uis', $command)) {
+            // Теплый белый (ближе к 0%)
+            $value = 0;
+        }
+        elseif (preg_match('/(нейтрал|средн)/uis', $command)) {
+            // Нейтральный белый (примерно 50%)
+            $value = 50;
+        }
+        // Увеличение: "температура выше", "холоднее"
+        elseif (preg_match('/(выше|холодн|добав|больше|увелич)/uis', $command)) {
+            $value = min(100, $currentLevel + $step);
+        }
+        // Уменьшение: "температура ниже", "теплее"
+        elseif (preg_match('/(ниже|тепл|меньше|уменьш)/uis', $command)) {
+            $value = max(0, $currentLevel - $step);
+        }
+
+        if (isset($value)) {
+            $run_code      .= "callMethod('$linked_object.setCct', array('value' => $value));";
+            // Для противоположного действия используем текущее значение, чтобы можно было отменить
+            $opposite_code .= "callMethod('$linked_object.setCct', array('value' => $currentLevel));";
+            $processed = 1;
+            $reply_confirm = 1;
+        }
+    }
+
     // --- ЦВЕТ ---
     elseif (preg_match('/' . LANG_SGuverLampTuya_PATTERN_COLOR . '/uis', $command)) {
         $colors = array(
