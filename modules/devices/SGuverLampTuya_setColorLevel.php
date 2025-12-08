@@ -22,6 +22,6 @@
  */
 
 $colorLevel = $params['brightness'] ?? $params['level'] ?? $params['colorBrightness'] ?? $params['colorLevel'] ?? $params['value'] ?? null;
-if ($level === null) return;
+if ($colorLevel === null) return;
 
 $this->setProperty('colorLevel', $colorLevel);
