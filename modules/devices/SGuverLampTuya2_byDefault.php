@@ -59,8 +59,8 @@
 
 
 $defaults = [
-    'color' => '#ffff00', 'colorLevel' => '100',
-	'level' => '100', 'cct' => '1',
+    'color' => '#ffff00', 'colorLevel' => '50',
+	'level' => '50', 'cct' => '50',
     'scenesList' => 
        'Спокойная=000e0d0000000000000000c80000,
         Чтение=010e0d0000000000000003e801f4,
@@ -98,12 +98,12 @@ $defaults = [
     'mode' => '2',
 
     'dayColor' => '#FFFFFF', 'dayColorLevel' => '100',
-    'dayLevel' => '100', 'dayCct' => '0', 
+    'dayLevel' => '100', 'dayCct' => '100', 
     'dayScene' => 'Восход', 
     'dayMode' => '2',
 
-    'nightColor' => '#FFFF00', 'nightColorLevel' => '30',
-    'nightLevel' => '30', 'nightCct' => '100', 
+    'nightColor' => '#FFFF00', 'nightColorLevel' => '10',
+    'nightLevel' => '10', 'nightCct' => '1', 
     'nightScene' => 'Закат', 
     'nightMode' => '2',
 
