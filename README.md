@@ -123,8 +123,8 @@ callMethod('Object.turnOn', [
 
 Можно корректировать:
 
-* `addTimeSunrise` + `signSunrise`
-* `addTimeSunset` + `signSunset`
+* `addTimeSunrise` `addTimeSunset` - смещение времени (чч:мм)
+* `signSunrise` `signSunset` - направление смещения (0=вычесть, 1=прибавить)
 
 ### 💡 По датчику освещения:
 
